@@ -3,23 +3,34 @@ package com.example.mobiledev.presentation.mainactivity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.mobiledev.presentation.navgraph.NavGraph
 
 class MainActivity : ComponentActivity() {
-
-    private val mainViewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            Box() {
-                NavGraph(startDestination = mainViewModel.startdestination)
+        setContent{
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ){
+                NavGraph()
             }
         }
     }
 }
+
+@Preview
+@Composable
+fun aaa(){
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        NavGraph()
+    }
+}
+
+
