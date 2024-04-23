@@ -17,15 +17,11 @@ fun MenuScreen(
     id:Int
 ){
     val menuitems = listOf(
-        menuElement(0, R.drawable.ic_rotate, R.string.rotate),
-        menuElement(1, R.drawable.ic_filter, R.string.filters),
-        menuElement(2, R.drawable.ic_scale, R.string.mapping),
-        menuElement(3, R.drawable.ic_cv, R.string.cv),
-        menuElement(4, R.drawable.ic_brokenline, R.string.vector),
-        menuElement(5, R.drawable.ic_retouch, R.string.retouching),
-        menuElement(6, R.drawable.ic_spiral, R.string.mask),
-        menuElement(7, R.drawable.ic_dots, R.string.biline),
-        menuElement(8, R.drawable.ic_cube, R.string.cube)
+        menuElement(0,R.drawable.ic_filter,R.string.filters),
+        menuElement(1, R.drawable.ic_cv, R.string.cv),
+        menuElement(2, R.drawable.ic_brokenline, R.string.vector),
+        menuElement(3, R.drawable.ic_dots, R.string.biline),
+        menuElement(4, R.drawable.ic_cube, R.string.cube)
     )
 
     var selected by remember {

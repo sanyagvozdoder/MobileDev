@@ -20,7 +20,8 @@ fun Menu(
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
+        verticalArrangement = Arrangement.Center
+    ) {
         items.forEach{item->
             Item(
                 modifier = Modifier.fillMaxWidth(),

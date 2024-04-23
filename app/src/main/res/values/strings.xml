@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">MobileDev</string>
-    <string name="rotate">Поворот Изображения</string>
-    <string name="filters"> Цветокоррекция и цветовые фильтры</string>
-    <string name="mapping">Масштабирование изображения</string>
+    <string name="rotate">Поворот</string>
+    <string name="filters"> Фильтры</string>
+    <string name="scale">Масштабирование</string>
     <string name="cv">Распознавание лиц/людей на изображении</string>
     <string name="vector">Векторный редактор</string>
     <string name="retouching">Ретуширование</string>
-    <string name="mask">Нерезкое маскирование</string>
+    <string name="mask">Маскирование</string>
     <string name="biline"> Билинейная и трилинейная фильтрация</string>
     <string name="cube">3D кубик</string>
 </resources>
