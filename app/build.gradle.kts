@@ -75,4 +75,6 @@ dependencies {
     //coil
     implementation("io.coil-kt:coil-compose:2.1.0")
 
+    //coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
 }
