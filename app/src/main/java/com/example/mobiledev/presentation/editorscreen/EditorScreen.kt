@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -33,13 +35,13 @@ import com.example.mobiledev.presentation.navgraph.Route
 import java.io.IOException
 import java.security.AccessController.getContext
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun EditorScreen(
     navController: NavController,
     number:Int
 ){
     val editViewModel = viewModel<EditorScreenViewModel>()
+    val stateUri by editViewModel.stateUriFlow.collectAsState()
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -70,7 +72,7 @@ fun EditorScreen(
                     .align(Alignment.Center)
             ){
                 AsyncImage(
-                    model = editViewModel.stateUriFlow,
+                    model = stateUri,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -80,13 +82,13 @@ fun EditorScreen(
 
                 Spacer(Modifier.fillMaxHeight(0.2f))
 
-                if(editViewModel.stateUriFlow != null){
+                if(stateUri != null){
                     Slider(
                         modifier = Modifier.fillMaxSize(),
                         items = sliderElelements,
                         onItemClick = functionsAlghoritms,
                         vmInst = editViewModel,
-                        img = readBytes(LocalContext.current,editViewModel.stateUriFlow.value)
+                        img = readBytes(LocalContext.current,stateUri)
                     )
                 }
             }
