@@ -1,57 +1,68 @@
 package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.net.Uri
-import android.os.Environment
+import android.util.Log
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.readRGBA
+import com.example.mobiledev.presentation.algoritms.util.toBitmap
+import com.example.mobiledev.presentation.algoritms.util.updateScreen
+import com.example.mobiledev.presentation.algoritms.util.writeRGBA
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.roundToInt
 
+// https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
 fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel):Unit{
+    val bitmap = toBitmap(img)
 
-    var bitmap = BitmapFactory.decodeByteArray(img,0, img?.size?:0)
-    var mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true)
+    val factor = 0.5f
+    val outWidth = (bitmap.width * factor).roundToInt()
+    val outHeight = (bitmap.height * factor).roundToInt()
 
-    var arrRgb = List<List<Rgb>>(bitmap.height){List<Rgb>(bitmap.width){Rgb(0,0,0,0)}}
+    val sums = MutableList<MutableList<Rgb>>(outWidth){MutableList<Rgb>(outHeight){ Rgb(0, 0, 0, 0) } }
+    val quantities = MutableList<MutableList<Float>>(outWidth){MutableList<Float>(outHeight){0f}}
 
-    for (i in 0..<bitmap.height){
-        for (j in 0..<bitmap.width){
-            val pixel = bitmap.getPixel(j,i)
-            arrRgb[i][j].red = Color.red(pixel)
-            arrRgb[i][j].green = Color.green(pixel)
-            arrRgb[i][j].blue = Color.blue(pixel)
-            arrRgb[i][j].alpha = Color.alpha(pixel)
+    val startTime = System.currentTimeMillis()
 
-            arrRgb[i][j].red = 0
-            arrRgb[i][j].green = 0
-            arrRgb[i][j].blue = 0
-            arrRgb[i][j].alpha = 255
+    repeat(bitmap.width){ x ->
+        val outX = (x * factor).toInt()
 
-            mutableBitmap.setPixel(
-                j,
-                i,
-                Color.argb(arrRgb[i][j].alpha,arrRgb[i][j].red,arrRgb[i][j].green,arrRgb[i][j].blue)
-            )
+        repeat(bitmap.height){ y ->
+            val outY = (y * factor).toInt()
+
+            val pixel = readRGBA(bitmap.getPixel(x, y))
+
+            sums[outX][outY].red += pixel.red
+            sums[outX][outY].green += pixel.green
+            sums[outX][outY].blue += pixel.blue
+            sums[outX][outY].alpha += pixel.alpha
+
+            quantities[outX][outY]++
         }
     }
 
-    val stream = ByteArrayOutputStream()
-    mutableBitmap.compress(Bitmap.CompressFormat.JPEG,90,stream)
-    val newImg = stream.toByteArray()
+    val outputBitmap = Bitmap.createBitmap(outWidth, outHeight, Bitmap.Config.ARGB_8888)
 
-    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    repeat(outWidth){ x ->
+        repeat(outHeight){ y ->
+            val pixel = sums[x][y]
+            val normalizer = 1f / quantities[x][y]
 
-    val file = File.createTempFile("newImage", ".jpg", downloadsDir)
+            pixel.red = (pixel.red * normalizer).toInt()
+            pixel.green = (pixel.green * normalizer).toInt()
+            pixel.blue = (pixel.blue * normalizer).toInt()
+            pixel.alpha = (pixel.alpha * normalizer).toInt()
 
-    val ostream = FileOutputStream(file)
-    ostream.write(newImg)
-    ostream.close()
+            outputBitmap.setPixel(x, y, writeRGBA(pixel))
+        }
+    }
 
-    viewModelInstance.onStateUpdate(Uri.fromFile(file))
+    val processingTime = System.currentTimeMillis() - startTime
+
+    updateScreen(outputBitmap, viewModelInstance)
+
+    Log.d("ALGO_SCALING", "processing finished at " + Thread.currentThread().toString() +
+            "in: " + processingTime.toString() + "ms. input colorSpace: " + bitmap.colorSpace.toString() +
+            ", output colorSpace: " + outputBitmap.colorSpace.toString())
 }
