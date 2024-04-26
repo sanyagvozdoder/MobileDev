@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,13 +15,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +38,7 @@ import com.example.mobiledev.presentation.editorscreen.common.sliderElement
 import com.example.mobiledev.presentation.navgraph.Route
 import java.io.IOException
 import java.security.AccessController.getContext
+import androidx.compose.runtime.Composable as Composable
 
 @Composable
 fun EditorScreen(
@@ -42,6 +47,7 @@ fun EditorScreen(
 ){
     val editViewModel = viewModel<EditorScreenViewModel>()
     val stateUri by editViewModel.stateUriFlow.collectAsState()
+    val sliderState by editViewModel.isSliderVisible.collectAsState()
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -82,7 +88,14 @@ fun EditorScreen(
 
                 Spacer(Modifier.fillMaxHeight(0.2f))
 
-                if(stateUri != null){
+                //state of screen
+                //1 state: no image(uri == null)
+                //2 state: image, + slider (SLiderItem,onclick)
+                //3 state: settings of filter + 2 buttons (exit mark -> back to 2 state)
+
+                AnimatedVisibility(
+                    visible = sliderState
+                ) {
                     Slider(
                         modifier = Modifier.fillMaxSize(),
                         items = sliderElelements,
@@ -102,6 +115,7 @@ fun EditorScreen(
                     pickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
+                    editViewModel.onSliderStateUpdate(true)
                 },
                 paramClick = null
             )

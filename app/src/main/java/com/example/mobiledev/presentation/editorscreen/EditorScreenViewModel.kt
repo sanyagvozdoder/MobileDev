@@ -30,4 +30,16 @@ class EditorScreenViewModel:ViewModel() {
             _stateUriFlow.emit(newImage)
         }
     }
+
+    private val _isSliderVisible = MutableStateFlow<Boolean>(false)
+
+    val isSliderVisible:StateFlow<Boolean>
+        get() = _isSliderVisible
+
+    fun onSliderStateUpdate(state:Boolean){
+        viewModelScope.launch{
+            _isSliderVisible.emit(state)
+        }
+    }
+
 }
