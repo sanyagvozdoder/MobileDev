@@ -13,6 +13,7 @@ import androidx.compose.material3.AssistChipDefaults.IconSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,15 +22,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun LazyItemScope.SliderItem(
     icon:Int,
     text:Int,
-    onClick:(ByteArray?, EditorScreenViewModel) -> Unit,
+    onClick: (ByteArray?, EditorScreenViewModel) -> Unit,
     vmInst: EditorScreenViewModel,
     img: ByteArray?
 ){
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .padding(horizontal = 5.dp)
@@ -40,12 +49,14 @@ fun LazyItemScope.SliderItem(
                 .border(1.dp, Color.Black, CircleShape)
                 .align(Alignment.CenterHorizontally)
                 .size(IconSize * 4)
-                .clickable(onClick = {onClick(img,vmInst)})
+                .clickable(onClick = {scope.launch(Dispatchers.IO){onClick(img, vmInst)}})
         ){
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = null,
-                modifier = Modifier.size(IconSize*2).align(Alignment.Center)
+                modifier = Modifier
+                    .size(IconSize * 2)
+                    .align(Alignment.Center)
             )
         }
         Text(
