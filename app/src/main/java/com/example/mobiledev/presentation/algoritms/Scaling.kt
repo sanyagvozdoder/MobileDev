@@ -30,30 +30,42 @@ fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 
-        val factor = 2f // МНОЖИТЕЛЬ УВЕЛИЧЕНИЯ ГДЕ 1 ЭТО 100% И ТАК ДАЛЕЕ
-        val outputWidth = (bitmap.width * factor).roundToInt()
-        val outputHeight = (bitmap.height * factor).roundToInt()
+        val factor = 1.3f // МНОЖИТЕЛЬ УВЕЛИЧЕНИЯ ГДЕ 1 ЭТО 100% И ТАК ДАЛЕЕ
+        val outputWidth = (bitmap.width * factor).toInt()
+        val outputHeight = (bitmap.height * factor).toInt()
 
         val outSums = MutableList<Rgb>(outputWidth * outputHeight) { Rgb(0, 0, 0, 0) }
-        val outWrites = MutableList<Boolean>(outputWidth * outputHeight) { false }
-        val outCounts = MutableList<Float>(outputWidth * outputHeight) { 0f }
+        val outCounts = MutableList<Int>(outputWidth * outputHeight) { 0 }
 
         val processPixel = { x: Int, y: Int, color: Int ->
             val outX = (x * factor).toInt()
             val outY = (y * factor).toInt()
 
-            val i = outY * outputWidth + outX
-            outSums[i].red += Color.red(color)
-            outSums[i].green += Color.green(color)
-            outSums[i].blue += Color.blue(color)
-            outSums[i].alpha += Color.alpha(color)
+            val nextOutX = ((x + 1) * factor).toInt()
+            val nextOutY = ((y + 1) * factor).toInt()
 
-            outCounts[i] = outCounts[i] + 1
+            for (dx in outX until nextOutX)
+            {
+                for (dy in outY until nextOutY)
+                {
+                    val i = dy * outputWidth + dx
+                    outSums[i].red += Color.red(color)
+                    outSums[i].green += Color.green(color)
+                    outSums[i].blue += Color.blue(color)
+                    outSums[i].alpha += Color.alpha(color)
 
-            outWrites[i] = true
+                    outCounts[i] = outCounts[i] + 1
+                    if(dy >= outputHeight)
+                        break
+                }
+                if(dx >= outputWidth)
+                    break
+            }
         }
 
         val makeNewBitmap = {
+            val inPixels = IntArray(bitmap.width * bitmap.height)
+            bitmap.getPixels(inPixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
             bitmap.recycle()
 
             val outputPixels = IntArray(outputWidth * outputHeight)
@@ -62,14 +74,7 @@ fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel) {
                 repeat(outputHeight) { y ->
                     val i = y * outputWidth + x
 
-                    if(outWrites[i] == false) {
-                        val origX = (x / factor).toInt()
-                        val origY = (y / factor).toInt()
-                        var iFrom = (origY * factor).roundToInt() * outputWidth +
-                                (origX * factor).roundToInt()
-                        outputPixels[i] = outputPixels[iFrom]
-                    }
-                    else {
+                    if (outCounts[i] > 0) {
                         val pixel = outSums[i]
                         val normalizer = 1f / outCounts[i]
 
