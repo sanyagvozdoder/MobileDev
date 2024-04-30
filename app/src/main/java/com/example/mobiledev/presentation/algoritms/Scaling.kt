@@ -1,7 +1,12 @@
 package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.util.Log
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.core.graphics.set
+import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
+import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
 import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
@@ -19,110 +24,75 @@ import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.roundToInt
 
-data class ParallelScalerConfig(
-    var input: Bitmap,
-    var factor: Float,
-    var chunkSize: Int = 100,
-)
-
-class ParallelScaler(private val config: ParallelScalerConfig) {
-    private val outWidth = (config.input.width * config.factor).roundToInt()
-    private val outHeight = (config.input.height * config.factor).roundToInt()
-    private val sums = MutableList<MutableList<Rgb>>(outWidth){MutableList<Rgb>(outHeight){ Rgb(0, 0, 0, 0) } }
-    private val quantities = MutableList<MutableList<Float>>(outWidth){MutableList<Float>(outHeight){0f}}
-    private var totalChunks = 0
-    private var processedChunks = 0
-
-    private suspend fun processChunk(ox:Int, oy:Int) = GlobalScope.async<Boolean>(Dispatchers.Default, start = CoroutineStart.LAZY) {
-        Log.d("ALGO_SCALING", "$ox x $oy working on " + Thread.currentThread().getId())
-        for (lx in 0..config.chunkSize){
-            val x = ox + lx
-            if(x >= config.input.width)
-                break
-            val outX = (x * config.factor).toInt()
-
-            for (ly in 0..config.chunkSize){
-                val y = oy + ly
-                if(y >= config.input.height)
-                    break
-                val outY = (y * config.factor).toInt()
-
-                val pixel = readRGBA(config.input.getPixel(x, y))
-
-                sums[outX][outY].red += pixel.red
-                sums[outX][outY].green += pixel.green
-                sums[outX][outY].blue += pixel.blue
-                sums[outX][outY].alpha += pixel.alpha
-
-                quantities[outX][outY]++
-            }
-        }
-        processedChunks++
-
-        true
-    }
-
-    suspend fun process() = GlobalScope.async<Bitmap>(start = CoroutineStart.LAZY) {
-
-
-        val startTime = System.currentTimeMillis()
-        val deferreds = mutableListOf<Deferred<Boolean>>()
-
-        for(chunkX in 0
-                until config.input.width + config.chunkSize
-                step config.chunkSize){
-            for(chunkY in 0
-                    until config.input.height + config.chunkSize
-                    step config.chunkSize){
-                deferreds.add(processChunk(chunkX, chunkY))
-                totalChunks++
-            }
-        }
-
-        Log.d("ALGO_SCALING", "waiting for process")
-
-        deferreds.awaitAll()
-
-        Log.d("ALGO_SCALING", "total processed $processedChunks/$totalChunks")
-
-        val outputBitmap = Bitmap.createBitmap(outWidth, outHeight, Bitmap.Config.ARGB_8888)
-
-        val processingTime = System.currentTimeMillis() - startTime
-
-        Log.d("ALGO_SCALING", "processing finished at " + Thread.currentThread().toString() +
-                "in: " + processingTime.toString() + "ms. input colorSpace: " + config.input.colorSpace.toString() +
-                ", output colorSpace: " + outputBitmap.colorSpace.toString())
-
-        repeat(outWidth){ x ->
-            repeat(outHeight){ y ->
-                val pixel = sums[x][y]
-                val normalizer = 1f / quantities[x][y]
-
-                pixel.red = (pixel.red * normalizer).toInt()
-                pixel.green = (pixel.green * normalizer).toInt()
-                pixel.blue = (pixel.blue * normalizer).toInt()
-                pixel.alpha = (pixel.alpha * normalizer).toInt()
-
-                outputBitmap.setPixel(x, y, writeRGBA(pixel))
-            }
-        }
-
-        outputBitmap
-    }
-}
-
 // https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
-fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel):Unit {
+fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 
-        val factor = 0.5f
+        val factor = 2f // МНОЖИТЕЛЬ УВЕЛИЧЕНИЯ ГДЕ 1 ЭТО 100% И ТАК ДАЛЕЕ
+        val outputWidth = (bitmap.width * factor).roundToInt()
+        val outputHeight = (bitmap.height * factor).roundToInt()
 
-        val config = ParallelScalerConfig(bitmap, factor, 100)
-        val scaler = ParallelScaler(config = config)
-        val outputBitmap = scaler.process().await()
+        val outSums = MutableList<Rgb>(outputWidth * outputHeight) { Rgb(0, 0, 0, 0) }
+        val outWrites = MutableList<Boolean>(outputWidth * outputHeight) { false }
+        val outCounts = MutableList<Float>(outputWidth * outputHeight) { 0f }
 
-        updateScreen(outputBitmap, viewModelInstance)
+        val processPixel = { x: Int, y: Int, color: Int ->
+            val outX = (x * factor).toInt()
+            val outY = (y * factor).toInt()
+
+            val i = outY * outputWidth + outX
+            outSums[i].red += Color.red(color)
+            outSums[i].green += Color.green(color)
+            outSums[i].blue += Color.blue(color)
+            outSums[i].alpha += Color.alpha(color)
+
+            outCounts[i] = outCounts[i] + 1
+
+            outWrites[i] = true
+        }
+
+        val makeNewBitmap = {
+            bitmap.recycle()
+
+            val outputPixels = IntArray(outputWidth * outputHeight)
+
+            repeat(outputWidth) { x ->
+                repeat(outputHeight) { y ->
+                    val i = y * outputWidth + x
+
+                    if(outWrites[i] == false) {
+                        val origX = (x / factor).toInt()
+                        val origY = (y / factor).toInt()
+                        var iFrom = (origY * factor).roundToInt() * outputWidth +
+                                (origX * factor).roundToInt()
+                        outputPixels[i] = outputPixels[iFrom]
+                    }
+                    else {
+                        val pixel = outSums[i]
+                        val normalizer = 1f / outCounts[i]
+
+                        pixel.red = (pixel.red * normalizer).toInt()
+                        pixel.green = (pixel.green * normalizer).toInt()
+                        pixel.blue = (pixel.blue * normalizer).toInt()
+                        pixel.alpha = (pixel.alpha * normalizer).toInt()
+
+                        val color = writeRGBA(pixel)
+
+                        outputPixels[i] = color
+                    }
+                }
+            }
+
+            val outputBitmap =
+                Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
+            outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
+            updateScreen(outputBitmap, viewModelInstance)
+        }
+
+        val config = ImageProcessorConfig(bitmap, processPixel, 100, "ALGO_SCALING")
+        val processor = ImageProcessor(config = config)
+        processor.process(makeNewBitmap).join()
     }
 }

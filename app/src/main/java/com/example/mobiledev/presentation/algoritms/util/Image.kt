@@ -37,6 +37,6 @@ fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
     val ostream = FileOutputStream(file)
     ostream.write(toByteArray(image))
     ostream.close()
-
+    image.recycle()
     viewModelInstance.onStateUpdate(Uri.fromFile(file))
 }
