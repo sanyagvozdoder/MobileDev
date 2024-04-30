@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
+import com.example.mobiledev.presentation.algoritms.Rotate
 import com.example.mobiledev.presentation.algoritms.Scaling
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.Slider
@@ -136,7 +137,7 @@ val sliderElelements = listOf(
 )
 
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel) -> Unit>(
-    ::Scaling,
+    ::Rotate,
     ::Scaling,
     ::Scaling,
     ::Scaling,
