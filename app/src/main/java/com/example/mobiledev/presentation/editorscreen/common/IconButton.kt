@@ -14,12 +14,11 @@ import androidx.compose.ui.res.painterResource
 fun IconButton(
     modifier: Modifier = Modifier,
     icon:Int,
-    onClick:(Any?)->Unit,
-    paramClick:Any?
+    onClick:()->Unit,
 ){
     Button(
         modifier = modifier,
-        onClick = {onClick(paramClick)},
+        onClick = onClick,
     ){
         Icon(
             painter = painterResource(id = icon),

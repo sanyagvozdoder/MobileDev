@@ -1,4 +1,4 @@
-package com.example.mobiledev.presentation.navmenu.common
+package com.example.mobiledev.presentation.sidebar.common
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -20,25 +20,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun Item(
+fun SideBarItem(
     modifier: Modifier = Modifier,
-    selected:Boolean,
-    onClick:(Int)->Unit,
     @DrawableRes icon:Int,
-    @StringRes text:Int,
-    id:Int,
-    selectedTextColor: Color = MaterialTheme.colorScheme.primary,
-    unselectedTextColor: Color = MaterialTheme.colorScheme.secondary,
+    @StringRes text:Int
 ){
-    Row(
-        modifier = modifier.clickable(onClick = {onClick(id)})
-    ){
+    Row(){
         Icon(
             painter = painterResource(id = icon),
             contentDescription = null,
             modifier = Modifier.size(AssistChipDefaults.IconSize)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(text = stringResource(id = text), color = if(selected) selectedTextColor else unselectedTextColor, fontSize = 15.sp )
+        Text(text = stringResource(id = text), fontSize = 15.sp )
     }
 }
+
+data class sideBarElement(
+    val id:Int,
+    @DrawableRes val icon:Int,
+    @StringRes val text:Int,
+    val route:String
+)

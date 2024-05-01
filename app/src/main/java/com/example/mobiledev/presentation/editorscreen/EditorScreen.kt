@@ -15,10 +15,25 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,15 +54,18 @@ import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
 import com.example.mobiledev.presentation.editorscreen.common.sliderElement
 import com.example.mobiledev.presentation.navgraph.Route
+import com.example.mobiledev.presentation.sidebar.common.SideBarItem
+import com.example.mobiledev.presentation.sidebar.common.sideBarElement
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.security.AccessController.getContext
 import androidx.compose.runtime.Composable as Composable
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
     navController: NavController,
-    number:Int
 ){
     val editViewModel = viewModel<EditorScreenViewModel>()
     val stateUri by editViewModel.stateUriFlow.collectAsState()
@@ -61,86 +79,128 @@ fun EditorScreen(
         onResult = {uri-> editViewModel.onStateUpdate(uri)}
     )
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ){
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(horizontal = 5.dp, vertical = 5.dp),
-                onClick = {
-                    navController.navigate(Route.MenuScreen.route + "/${number}")
-                },
-                icon = R.drawable.ic_menu,
-                paramClick = number
-            )
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var selectedItemIndex by remember {
+        mutableStateOf(0)
+    }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.85f)
-                    .align(Alignment.Center)
-            ){
-                AsyncImage(
-                    model = stateUri,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.8f)
-                )
-
-                Spacer(Modifier.fillMaxHeight(0.2f))
-
-                //state of screen
-                //1 state: no image(uri == null)
-                //2 state: image, + slider (SLiderItem,onclick)
-                //3 state: settings of filter + 2 buttons (exit mark -> back to 2 state)
-
-                AnimatedVisibility(
-                    visible = sliderState
-                ) {
-                    Slider(
-                        modifier = Modifier.fillMaxSize(),
-                        items = sliderElelements,
-                        vmInst = editViewModel
-                    )
-                }
-                
-                AnimatedVisibility(visible = settingsState != -1) {
-                    SettingsTools(
-                        onAcceptClick = {
-                            functionsAlghoritms[settingsState](readBytes(context,stateUri), editViewModel)
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet {
+                menuitems.forEachIndexed{index,item->
+                    NavigationDrawerItem(
+                        label = {
+                            SideBarItem(
+                                icon = item.icon,
+                                text = item.text
+                            )
                         },
-                        onBackClick = {
-                            editViewModel.onSliderStateUpdate(true)
-                            editViewModel.onSettingsStateUpdate(-1)
-                        },
-                        numberOfSliders = if(settingsState != -1 ) settings[settingsState].numOfSliders else 0
+                        selected = index == selectedItemIndex,
+                        onClick = {
+                            selectedItemIndex = index
+                            navController.navigate(item.route)
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        }
                     )
                 }
             }
+        },
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = "Фильтры")
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    drawerState.open()
+                                }
+                            },
+                            icon = R.drawable.ic_menu
+                        )
+                    }
+                )
+            },
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(it),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ){
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.85f)
+                            .align(Alignment.Center)
+                    ){
+                        AsyncImage(
+                            model = stateUri,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.8f)
+                        )
 
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(horizontal = 5.dp, vertical = 5.dp),
-                icon = R.drawable.ic_pic,
-                onClick = {
-                    pickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        Spacer(Modifier.fillMaxHeight(0.2f))
+
+                        AnimatedVisibility(
+                            visible = sliderState
+                        ) {
+                            Slider(
+                                modifier = Modifier.fillMaxSize(),
+                                items = sliderElelements,
+                                vmInst = editViewModel
+                            )
+                        }
+
+                        AnimatedVisibility(visible = settingsState != -1) {
+                            SettingsTools(
+                                onAcceptClick = {
+                                    functionsAlghoritms[settingsState](readBytes(context,stateUri), editViewModel)
+                                },
+                                onBackClick = {
+                                    editViewModel.onSliderStateUpdate(true)
+                                    editViewModel.onSettingsStateUpdate(-1)
+                                },
+                                numberOfSliders = if(settingsState != -1 ) settings[settingsState].numOfSliders else 0
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(horizontal = 5.dp, vertical = 5.dp),
+                        icon = R.drawable.ic_pic,
+                        onClick = {
+                            pickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                            editViewModel.onSliderStateUpdate(true)
+                        },
                     )
-                    editViewModel.onSliderStateUpdate(true)
-                },
-                paramClick = null
-            )
+                }
+            }
         }
     }
 }
 
+val menuitems = listOf(
+    sideBarElement(0, R.drawable.ic_filter, R.string.filters,Route.FilterScreen.route),
+    sideBarElement(1, R.drawable.ic_cv, R.string.cv,Route.CVScreen.route),
+    sideBarElement(2, R.drawable.ic_brokenline, R.string.vector,Route.VectorScreen.route),
+    sideBarElement(3, R.drawable.ic_dots, R.string.biline, Route.BilineScreen.route),
+    sideBarElement(4, R.drawable.ic_cube, R.string.cube, Route.CubeScreen.route)
+)
 
 val sliderElelements = listOf(
     sliderElement(0, R.drawable.ic_rotate,R.string.rotate),

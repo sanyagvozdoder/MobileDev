@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mobiledev.presentation.editorscreen.EditorScreen
-import com.example.mobiledev.presentation.navmenu.MenuScreen
+import com.example.mobiledev.presentation.vectorscreen.VectorScreen
 
 @Composable
 fun NavGraph(){
@@ -15,17 +15,13 @@ fun NavGraph(){
 
     NavHost(
         navController = navController,
-        startDestination = Route.MenuScreen.route + "/${0}"
+        startDestination = Route.FilterScreen.route
     ){
-        composable(route = Route.MenuScreen.route + "/{number}", arguments = listOf(navArgument("number"){
-            type = NavType.IntType
-        })){
-            MenuScreen(navController,it.arguments?.getInt("number")?:0)
+        composable(route = Route.FilterScreen.route){
+            EditorScreen(navController)
         }
-        composable(route = Route.FilterScreen.route + "/{number}", arguments = listOf(navArgument("number"){
-            type = NavType.IntType
-        })){
-            EditorScreen(navController,it.arguments?.getInt("number")?:0)
+        composable(route = Route.VectorScreen.route){
+            VectorScreen(navController)
         }
     }
 }
