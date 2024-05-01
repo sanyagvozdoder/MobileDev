@@ -34,6 +34,8 @@ import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.Rotate
 import com.example.mobiledev.presentation.algoritms.Scaling
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
+import com.example.mobiledev.presentation.editorscreen.common.SettingsItems
+import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
 import com.example.mobiledev.presentation.editorscreen.common.sliderElement
 import com.example.mobiledev.presentation.navgraph.Route
@@ -50,6 +52,9 @@ fun EditorScreen(
     val editViewModel = viewModel<EditorScreenViewModel>()
     val stateUri by editViewModel.stateUriFlow.collectAsState()
     val sliderState by editViewModel.isSliderVisible.collectAsState()
+    val settingsState by editViewModel.settingsState.collectAsState()
+
+    val context = LocalContext.current
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -104,6 +109,19 @@ fun EditorScreen(
                         vmInst = editViewModel
                     )
                 }
+                
+                AnimatedVisibility(visible = settingsState != -1) {
+                    SettingsTools(
+                        onAcceptClick = {
+                            functionsAlghoritms[settingsState](readBytes(context,stateUri), editViewModel)
+                        },
+                        onBackClick = {
+                            editViewModel.onSliderStateUpdate(true)
+                            editViewModel.onSettingsStateUpdate(-1)
+                        },
+                        numberOfSliders = if(settingsState != -1 ) settings[settingsState].numOfSliders else 0
+                    )
+                }
             }
 
             IconButton(
@@ -132,6 +150,16 @@ val sliderElelements = listOf(
     sliderElement(4, R.drawable.ic_filter,R.string.filters),
     sliderElement(5, R.drawable.ic_retouch,R.string.retouching),
     sliderElement(6, R.drawable.ic_spiral,R.string.mask),
+)
+
+val settings = listOf(
+    SettingsItems(0),
+    SettingsItems(1),
+    SettingsItems(0),
+    SettingsItems(0),
+    SettingsItems(0),
+    SettingsItems(0),
+    SettingsItems(0)
 )
 
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel) -> Unit>(
