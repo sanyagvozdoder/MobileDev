@@ -46,6 +46,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
+import com.example.mobiledev.presentation.algoritms.Contrast
+import com.example.mobiledev.presentation.algoritms.Grayscale
+import com.example.mobiledev.presentation.algoritms.Negative
 import com.example.mobiledev.presentation.algoritms.Rotate
 import com.example.mobiledev.presentation.algoritms.Scaling
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
@@ -225,9 +228,9 @@ val settings = listOf(
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel) -> Unit>(
     ::Rotate,
     ::Scaling,
-    ::Scaling,
-    ::Scaling,
-    ::Scaling,
+    ::Contrast,
+    ::Grayscale,
+    ::Negative,
     ::Scaling,
     ::Scaling
 )
