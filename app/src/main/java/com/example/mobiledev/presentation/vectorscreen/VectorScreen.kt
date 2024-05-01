@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalDrawerSheet
@@ -36,12 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
+import com.example.mobiledev.presentation.algoritms.DrawSpline
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
@@ -67,6 +71,9 @@ fun VectorScreen(
         mutableStateListOf<Offset>()
     }
 
+    var isDrawSpline by remember{
+        mutableStateOf(false)
+    }
 
     ModalNavigationDrawer(
         drawerContent = {
@@ -112,36 +119,54 @@ fun VectorScreen(
                 )
             },
         ) {
-            Canvas(
+            Column(
                 modifier = Modifier
                     .padding(it)
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.8f)
-                    .border(2.dp,Color.Black)
-                    .pointerInput(Unit) {
-                        detectTapGestures { offset ->
-                            dots.add(offset)
+                    .fillMaxSize()
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .fillMaxHeight(0.8f)
+                        .border(2.dp, Color.Black)
+                        .pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                dots.add(offset)
+                            }
+                        }
+                ){
+                    dots.forEachIndexed{index,dot->
+                        drawCircle(
+                            color = Color.Black,
+                            radius = 20f,
+                            center = dot
+                        )
+
+                        if (dots.size >= 2 && index != 0){
+                            drawLine(
+                                color =  Color.Black,
+                                start = dots[index - 1],
+                                end = dots[index],
+                                strokeWidth = 10f,
+                                cap = StrokeCap.Round
+                            )
                         }
                     }
-            ){
-                dots.forEachIndexed{index,dot->
-                    drawCircle(
-                        color = Color.Black,
-                        radius = 20f,
-                        center = dot
-                    )
 
-                    if (dots.size >= 2 && index != 0){
-                        drawLine(
-                            color =  Color.Black,
-                            start = dots[index - 1],
-                            end = dots[index],
-                            strokeWidth = 10f,
-                            cap = StrokeCap.Round
-                        )
+                    if(isDrawSpline){
+                        DrawSpline(dots)
                     }
                 }
+                Button(
+                    onClick = {
+                        isDrawSpline = true
+                    }
+                )
+                {
+                    Text(text = "сплайн))")
+                }
             }
+
         }
 
     }
