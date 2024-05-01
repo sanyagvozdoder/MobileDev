@@ -13,9 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 fun Slider(
     items:List<sliderElement>,
     modifier: Modifier = Modifier,
-    onItemClick: List<(ByteArray?, EditorScreenViewModel) -> Unit>,
-    vmInst: EditorScreenViewModel,
-    img: ByteArray?
+    vmInst: EditorScreenViewModel
 ){
     LazyRow(
         modifier = modifier
@@ -25,9 +23,8 @@ fun Slider(
                 SliderItem(
                     icon = items[index].icon,
                     text = items[index].text,
-                    onClick = onItemClick[index],
                     vmInst = vmInst,
-                    img = img
+                    index = index
                 )
             }
         }

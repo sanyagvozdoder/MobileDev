@@ -33,12 +33,9 @@ import kotlinx.coroutines.launch
 fun LazyItemScope.SliderItem(
     icon:Int,
     text:Int,
-    onClick: (ByteArray?, EditorScreenViewModel) -> Unit,
     vmInst: EditorScreenViewModel,
-    img: ByteArray?
+    index:Int
 ){
-    val scope = rememberCoroutineScope()
-
     Column(
         modifier = Modifier
             .padding(horizontal = 5.dp)
@@ -49,7 +46,10 @@ fun LazyItemScope.SliderItem(
                 .border(1.dp, Color.Black, CircleShape)
                 .align(Alignment.CenterHorizontally)
                 .size(IconSize * 4)
-                .clickable(onClick = {scope.launch(Dispatchers.IO){onClick(img, vmInst)}})
+                .clickable(onClick = {
+                    vmInst.onSliderStateUpdate(false)
+                    vmInst.onSettingsStateUpdate(index)
+                })
         ){
             Icon(
                 painter = painterResource(id = icon),

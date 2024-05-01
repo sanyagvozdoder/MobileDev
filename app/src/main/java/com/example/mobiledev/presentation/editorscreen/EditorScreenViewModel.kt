@@ -42,4 +42,14 @@ class EditorScreenViewModel:ViewModel() {
         }
     }
 
+    private val _settingsState = MutableStateFlow<Int>(-1)
+
+    val settingsState:StateFlow<Int>
+        get() = _settingsState
+
+    fun onSettingsStateUpdate(state:Int){
+        viewModelScope.launch{
+            _settingsState.emit(state)
+        }
+    }
 }

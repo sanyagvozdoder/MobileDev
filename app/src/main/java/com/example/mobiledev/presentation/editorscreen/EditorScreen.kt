@@ -101,9 +101,7 @@ fun EditorScreen(
                     Slider(
                         modifier = Modifier.fillMaxSize(),
                         items = sliderElelements,
-                        onItemClick = functionsAlghoritms,
-                        vmInst = editViewModel,
-                        img = readBytes(LocalContext.current,stateUri)
+                        vmInst = editViewModel
                     )
                 }
             }
