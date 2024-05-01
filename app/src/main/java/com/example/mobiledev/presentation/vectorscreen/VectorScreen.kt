@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -61,8 +63,8 @@ fun VectorScreen(
     var selectedItemIndex by remember {
         mutableStateOf(0)
     }
-    var dots by remember{
-        mutableStateOf(mutableListOf<Offset>())
+    val dots = remember{
+        mutableStateListOf<Offset>()
     }
 
 
@@ -117,18 +119,26 @@ fun VectorScreen(
                     .fillMaxHeight(0.8f)
                     .border(2.dp,Color.Black)
                     .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { offset ->
-                                dots.add(offset)
-                            }
-                        )
+                        detectTapGestures { offset ->
+                            dots.add(offset)
+                        }
                     }
             ){
-                dots.forEach{dot->
-                    drawCircle(Color.Black,20f,dot)
+                dots.forEachIndexed{index,dot->
+                    drawCircle(
+                        color = Color.Black,
+                        radius = 20f,
+                        center = dot
+                    )
 
-                    if (dots.size >= 2){
-                        drawLine(Color.Black, start = dots[dots.size-1], end = dots[dots.size - 2], 10f)
+                    if (dots.size >= 2 && index != 0){
+                        drawLine(
+                            color =  Color.Black,
+                            start = dots[index - 1],
+                            end = dots[index],
+                            strokeWidth = 10f,
+                            cap = StrokeCap.Round
+                        )
                     }
                 }
             }
