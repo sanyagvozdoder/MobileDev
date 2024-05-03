@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,9 +67,6 @@ fun VectorScreen(
 ){
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var selectedItemIndex by remember {
-        mutableStateOf(0)
-    }
     val dots = remember{
         mutableStateListOf<Offset>()
     }
@@ -86,9 +86,8 @@ fun VectorScreen(
                                 text = item.text
                             )
                         },
-                        selected = index == selectedItemIndex,
+                        selected = false,
                         onClick = {
-                            selectedItemIndex = index
                             navController.navigate(item.route)
                             scope.launch {
                                 drawerState.close()
@@ -104,7 +103,7 @@ fun VectorScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Фильтры")
+                        Text(text = "Редактор сплайнов", color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -115,19 +114,23 @@ fun VectorScreen(
                             },
                             icon = R.drawable.ic_menu
                         )
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    )
                 )
             },
         ) {
             Column(
                 modifier = Modifier
-                    .padding(it)
+                    .padding(vertical = it.calculateTopPadding() + 15.dp)
                     .fillMaxSize()
             ) {
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .fillMaxHeight(0.8f)
+                        .align(Alignment.CenterHorizontally)
                         .border(2.dp, Color.Black)
                         .pointerInput(Unit) {
                             detectTapGestures { offset ->

@@ -24,7 +24,6 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,6 +63,9 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.security.AccessController.getContext
 import androidx.compose.runtime.Composable as Composable
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,9 +86,6 @@ fun EditorScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var selectedItemIndex by remember {
-        mutableStateOf(0)
-    }
 
     ModalNavigationDrawer(
         drawerContent = {
@@ -99,9 +98,8 @@ fun EditorScreen(
                                 text = item.text
                             )
                         },
-                        selected = index == selectedItemIndex,
+                        selected = false,
                         onClick = {
-                            selectedItemIndex = index
                             navController.navigate(item.route)
                             scope.launch {
                                 drawerState.close()
@@ -117,7 +115,7 @@ fun EditorScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Фильтры")
+                        Text(text = "Фильтры", color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -128,12 +126,17 @@ fun EditorScreen(
                             },
                             icon = R.drawable.ic_menu
                         )
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        )
                 )
             },
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(it),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize()
@@ -167,14 +170,10 @@ fun EditorScreen(
 
                         AnimatedVisibility(visible = settingsState != -1) {
                             SettingsTools(
-                                onAcceptClick = {
-                                    functionsAlghoritms[settingsState](readBytes(context,stateUri), editViewModel)
-                                },
-                                onBackClick = {
-                                    editViewModel.onSliderStateUpdate(true)
-                                    editViewModel.onSettingsStateUpdate(-1)
-                                },
-                                numberOfSliders = if(settingsState != -1 ) settings[settingsState].numOfSliders else 0
+                                onAcceptClick = if(settingsState != -1 ) functionsAlghoritms[settingsState] else functionsAlghoritms[0],
+                                sliders = if(settingsState != -1 ) settings[settingsState] else null,
+                                editorScreenViewModel = editViewModel,
+                                byteArray = readBytes(context,stateUri)
                             )
                         }
                     }
@@ -216,16 +215,16 @@ val sliderElelements = listOf(
 )
 
 val settings = listOf(
-    SettingsItems(0),
-    SettingsItems(1),
-    SettingsItems(0),
-    SettingsItems(0),
-    SettingsItems(0),
-    SettingsItems(0),
-    SettingsItems(0)
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(1, listOf("Коэфицент масштабирования"), listOf<Pair<Int,Int>>(Pair(50, 200))),
+    SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>())
 )
 
-val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel) -> Unit>(
+val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) -> Unit>(
     ::Rotate,
     ::Scaling,
     ::Contrast,
@@ -238,3 +237,4 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel) -> Unit>(
 @Throws(IOException::class)
 private fun readBytes(context: Context, uri: Uri?): ByteArray? =
     uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() } }
+

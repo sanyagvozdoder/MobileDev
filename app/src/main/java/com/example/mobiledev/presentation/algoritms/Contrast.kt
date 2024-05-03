@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
 
 // https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
-fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel) {
+fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 
@@ -39,7 +39,7 @@ fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel) {
 
             val pixel = readRGBA(color)
 
-            val contrast : Float = -100.0f;
+            val contrast : Float = args[0].toFloat();
 
             val coeff : Float = (259f * (contrast + 255f)) / (255f * (259f - contrast))
 

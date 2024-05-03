@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalEncodingApi::class)
-fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel) {
+fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 

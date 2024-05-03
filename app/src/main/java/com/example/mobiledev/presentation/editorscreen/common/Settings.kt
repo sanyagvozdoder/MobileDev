@@ -27,22 +27,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.mobiledev.R
+import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 
 @Composable
 fun SettingsTools(
     modifier: Modifier = Modifier,
-    numberOfSliders:Int = 0,
-    onAcceptClick:()->Unit,
-    onBackClick:()->Unit
+    sliders:SettingsItems?,
+    onAcceptClick:(ByteArray?, EditorScreenViewModel, List<Int>)->Unit,
+    editorScreenViewModel: EditorScreenViewModel,
+    byteArray: ByteArray?
 ){
     val sliderPositions = remember { mutableStateListOf<Float>().apply {
-        repeat(numberOfSliders) {
-            add(100f)
+        repeat(sliders?.numOfSliders ?: 0) {index->
+            add(((sliders?.range?.get(index)?.second?.toFloat()?:100f) + (sliders?.range?.get(index)?.first?.toFloat()?:0f))/2)
         }
     }}
 
     val animatedTextStates = remember { mutableStateListOf<Boolean>().apply {
-        repeat(numberOfSliders) {
+        repeat(sliders?.numOfSliders ?: 0) {
             add(false)
         }
     }}
@@ -59,7 +61,11 @@ fun SettingsTools(
             Button(
                 modifier = Modifier
                     .background(color = Color.Transparent),
-                onClick = {onBackClick()}) {
+                onClick = {
+                    editorScreenViewModel.onSliderStateUpdate(true)
+                    editorScreenViewModel.onSettingsStateUpdate(-1)
+                }
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_close),
                     contentDescription = null,
@@ -69,7 +75,13 @@ fun SettingsTools(
             Button(
                 modifier = Modifier
                     .background(color = Color.Transparent),
-                onClick = {onAcceptClick()}
+                onClick = {
+                    var params = mutableListOf<Int>()
+                    (0..((sliders?.numOfSliders ?: 0) - 1)).forEach{index->
+                        params.add(sliderPositions[index].toInt())
+                    }
+                    onAcceptClick(byteArray,editorScreenViewModel,params)
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_accept),
@@ -79,21 +91,19 @@ fun SettingsTools(
             }
         }
 
-        (0..numberOfSliders-1).forEach {index->
-            AnimatedVisibility(visible = animatedTextStates[index]) {
-                Text(
-                    text = sliderPositions[index].toInt().toString(),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                )
-            }
+        (0..((sliders?.numOfSliders ?: 0) - 1)).forEach {index->
+            Text(
+                text = (sliders?.text?.get(index) ?: " ") + ": " + sliderPositions[index].toInt().toString(),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+
 
             androidx.compose.material3.Slider(
                 value = sliderPositions[index],
                 onValueChange = {newValue->
                     sliderPositions[index] = newValue
-                    animatedTextStates[index] = true
                 },
-                valueRange = 50f..200f,
+                valueRange = (sliders?.range?.get(index)?.first?.toFloat()?:0f)..(sliders?.range?.get(index)?.second?.toFloat()?:100f),
                 modifier = Modifier.fillMaxWidth(0.8f).padding(vertical = 8.dp)
             )
         }
