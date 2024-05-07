@@ -5,15 +5,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +53,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.DrawSpline
+import com.example.mobiledev.presentation.algoritms.OnTap
+import com.example.mobiledev.presentation.algoritms.util.SplineDot
+import com.example.mobiledev.presentation.algoritms.util.VectorScreenMode
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
@@ -68,11 +75,18 @@ fun VectorScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val dots = remember{
-        mutableStateListOf<Offset>()
+        mutableStateListOf<SplineDot>()
+    }
+    var selectedDot by remember {
+        mutableStateOf(-1)
     }
 
-    var isDrawSpline by remember{
-        mutableStateOf(false)
+    var selectionMode by remember {
+        mutableStateOf(false) // false - dot, true - anchor
+    }
+
+    var mode by remember {
+        mutableStateOf(VectorScreenMode.DRAW)
     }
 
     ModalNavigationDrawer(
@@ -129,48 +143,102 @@ fun VectorScreen(
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
-                        .fillMaxHeight(0.8f)
+                        .fillMaxHeight(0.75f)
                         .align(Alignment.CenterHorizontally)
                         .border(2.dp, Color.Black)
                         .pointerInput(Unit) {
-                            detectTapGestures { offset ->
-                                dots.add(offset)
+                            detectTapGestures(
+                                onDoubleTap = {
+                                    selectionMode = !selectionMode
+                                },
+                                onLongPress = { offset ->
+                                    if (mode == VectorScreenMode.EDIT) {
+                                        if (selectedDot != -1) {
+                                            if (selectionMode == false)
+                                                dots[selectedDot] =
+                                                    SplineDot(offset, dots[selectedDot].anchor)
+                                            else
+                                                dots[selectedDot] =
+                                                    SplineDot(dots[selectedDot].position, offset)
+                                        }
+                                    }
+                                }) { offset ->
+                                if (mode == VectorScreenMode.DRAW) {
+                                    if (dots.size > 0) {
+                                        val prevDot = dots[dots.size - 1]
+                                        prevDot.anchor =
+                                            prevDot.position - (prevDot.position - offset) / 2f
+                                    }
+                                    dots.add(SplineDot(offset, offset))
+                                } else {
+                                    selectionMode = false
+                                    OnTap(dots, offset, { i ->
+                                        selectedDot = i
+                                    })
+                                }
                             }
                         }
                 ){
-                    dots.forEachIndexed{index,dot->
-                        drawCircle(
-                            color = Color.Black,
-                            radius = 20f,
-                            center = dot
-                        )
-
-                        if (dots.size >= 2 && index != 0){
-                            drawLine(
-                                color =  Color.Black,
-                                start = dots[index - 1],
-                                end = dots[index],
-                                strokeWidth = 10f,
-                                cap = StrokeCap.Round
-                            )
+                    DrawSpline(dots, mode, selectedDot, selectionMode)
+                }
+                Row {
+                    if (mode == VectorScreenMode.DRAW)
+                    {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                mode = VectorScreenMode.EDIT
+                            }
+                        ) {
+                            Text(text = "Установка точек")
                         }
                     }
-
-                    if(isDrawSpline){
-                        DrawSpline(dots)
+                    else
+                    {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                mode = VectorScreenMode.DRAW
+                                selectedDot = -1
+                                selectionMode = false
+                            }
+                        ) {
+                            Text(text = "Редактирование")
+                        }
                     }
                 }
-                Button(
-                    onClick = {
-                        isDrawSpline = true
+                Row {
+                    Button(
+                        onClick = {
+                            dots.clear()
+                            mode = VectorScreenMode.DRAW
+                            selectedDot = -1
+                            selectionMode = false
+                        }
+                    ){
+                        Text(text = "Очистить всё")
                     }
-                )
-                {
-                    Text(text = "сплайн))")
+                    if(selectedDot != -1)
+                    {
+                        Button(
+                            onClick = {
+                                dots.removeAt(selectedDot)
+                                selectedDot = -1
+                                selectionMode = false
+                            }
+                        ){
+                            Text(text = "Удалить точку")
+                        }
+                    }
+                }
+                Row {
+                    if(mode == VectorScreenMode.DRAW)
+                        Text(text = "Нажмите, чтобы разместить точку.")
+                    else
+                        Text(text = "Нажмите, чтобы выделить, удерживайте, чтобы переместить. " +
+                                "Двойное нажатие - переключение якорь/точка.")
                 }
             }
-
         }
-
     }
 }
