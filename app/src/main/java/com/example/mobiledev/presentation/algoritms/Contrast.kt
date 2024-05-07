@@ -22,7 +22,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.*
 import kotlin.math.roundToInt
+
 
 // https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
@@ -43,11 +45,19 @@ fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List
 
             val coeff : Float = (259f * (contrast + 255f)) / (255f * (259f - contrast))
 
+            if (contrast >= 0)
+            {
+                pixel.red = ((pixel.red - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
+                pixel.green = ((pixel.green - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
+                pixel.blue = ((pixel.blue - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
+            }
 
-            pixel.red = ((pixel.red - 128) * coeff + 128).toInt();
-            pixel.green = ((pixel.green - 128) * coeff + 128).toInt();
-            pixel.blue = ((pixel.blue - 128) * coeff + 128).toInt();
-
+            else
+            {
+                pixel.red = ((pixel.red - 128) * coeff).toInt() + 128
+                pixel.green = ((pixel.green - 128) * coeff).toInt() + 128
+                pixel.blue = ((pixel.blue - 128) * coeff).toInt() + 128
+            }
             val i = y * outputWidth + x
             outputPixels[i] = writeRGBA(pixel)
         }
