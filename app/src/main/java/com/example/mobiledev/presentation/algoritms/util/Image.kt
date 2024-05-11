@@ -30,13 +30,15 @@ fun writeRGBA(pixel:Rgb):Int {
 }
 
 fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
+    viewModelInstance.onStateUpdate(generateUri(image))
+}
+
+fun generateUri(image:Bitmap): Uri {
     val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-
     val file = File.createTempFile("newImage", ".jpg", downloadsDir)
-
     val ostream = FileOutputStream(file)
     ostream.write(toByteArray(image))
     ostream.close()
     image.recycle()
-    viewModelInstance.onStateUpdate(Uri.fromFile(file))
+    return Uri.fromFile(file)
 }

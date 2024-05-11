@@ -58,7 +58,6 @@ fun CVScreen(
 ){
     val cvViewModel = viewModel<CVScreenViewModel>()
     val stateUri by cvViewModel.stateUriFlow.collectAsState()
-
     val context = LocalContext.current
 
     val pickerLauncher = rememberLauncherForActivityResult(
@@ -157,7 +156,7 @@ fun CVScreen(
                             .align(Alignment.BottomEnd)
                             .padding(horizontal = 5.dp, vertical = 5.dp),
                         onClick = {
-                            cvViewModel.onStateUpdate(FaceRecognition(readBytes(context, stateUri)))
+                            cvViewModel.onStateUpdate(FaceRecognition(readBytes(context, stateUri), context.resources))
                         }
                     ){
                         Text(text = "Launch")
