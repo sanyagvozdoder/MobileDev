@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 data class ImageProcessorConfig (
     var input: Bitmap,
     var func: (x:Int, y:Int, color: Int) -> Unit,
-    var chunkSize: Int = 100,
+    var chunkSize: Int = 200,
     var logTag: String = "PROCESSOR",
 )
 
@@ -28,7 +28,7 @@ class ImageProcessor(private val config: ImageProcessorConfig) {
 
     private fun processChunk(ox:Int, oy:Int) = GlobalScope.launch(Dispatchers.Default,
         start = CoroutineStart.LAZY) {
-        Log.d(config.logTag, "$ox x $oy working on " + Thread.currentThread().getId())
+        //Log.d(config.logTag, "$ox x $oy working on " + Thread.currentThread().getId())
 
         for (lx in 0 until config.chunkSize){
             val x = ox + lx
@@ -63,11 +63,11 @@ class ImageProcessor(private val config: ImageProcessorConfig) {
             }
         }
 
-        Log.d(config.logTag, "waiting for process")
+        //Log.d(config.logTag, "waiting for process")
 
         jobs.joinAll()
 
-        Log.d(config.logTag, "total processed $processedChunks/$totalChunks")
+        //Log.d(config.logTag, "total processed $processedChunks/$totalChunks")
 
         onEnd.invoke()
     }
