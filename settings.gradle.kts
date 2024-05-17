@@ -16,4 +16,5 @@ dependencyResolutionManagement {
 rootProject.name = "MobileDev"
 include(":app")
 include(":cv")
+
  

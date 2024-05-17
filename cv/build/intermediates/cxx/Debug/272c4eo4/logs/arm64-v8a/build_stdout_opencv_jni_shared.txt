@@ -1,2 +1,2 @@
-ninja: Entering directory `C:\AndroidProjects\MobileDev\cv\.cxx\Debug\272c4eo4\arm64-v8a'
+ninja: Entering directory `C:\Users\user\MobileDev2\cv\.cxx\Debug\272c4eo4\arm64-v8a'
 ninja: no work to do.

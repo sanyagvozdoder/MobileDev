@@ -8,15 +8,22 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -66,6 +73,7 @@ import androidx.compose.runtime.Composable as Composable
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +132,8 @@ fun EditorScreen(
                                     drawerState.open()
                                 }
                             },
-                            icon = R.drawable.ic_menu
+                            icon = R.drawable.ic_menu,
+                            isEnabled = true
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -148,7 +157,7 @@ fun EditorScreen(
                             .align(Alignment.Center)
                     ){
                         AsyncImage(
-                            model = stateUri,
+                            model = stateUri.currentValue.value,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -156,7 +165,39 @@ fun EditorScreen(
                                 .fillMaxHeight(0.8f)
                         )
 
-                        Spacer(Modifier.fillMaxHeight(0.2f))
+                        Spacer(Modifier.fillMaxHeight(0.05f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(0.4f)
+                        ) {
+                            Button(
+                                onClick = {
+                                    stateUri.undo()
+                                },
+                                enabled = stateUri.undoSize() >= 1,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                            )
+                            {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_undo),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(AssistChipDefaults.IconSize)
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    stateUri.redo()
+                                },
+                                enabled = stateUri.redoSize() >= 1,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                            )
+                            {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_redo),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(AssistChipDefaults.IconSize)
+                                )
+                            }
+                        }
 
                         AnimatedVisibility(
                             visible = sliderState
@@ -173,7 +214,7 @@ fun EditorScreen(
                                 onAcceptClick = if(settingsState != -1 ) functionsAlghoritms[settingsState] else functionsAlghoritms[0],
                                 sliders = if(settingsState != -1 ) settings[settingsState] else null,
                                 editorScreenViewModel = editViewModel,
-                                byteArray = readBytes(context,stateUri)
+                                byteArray = readBytes(context,stateUri.currentValue.value)
                             )
                         }
                     }
@@ -189,6 +230,7 @@ fun EditorScreen(
                             )
                             editViewModel.onSliderStateUpdate(true)
                         },
+                        isEnabled = true
                     )
                 }
             }
