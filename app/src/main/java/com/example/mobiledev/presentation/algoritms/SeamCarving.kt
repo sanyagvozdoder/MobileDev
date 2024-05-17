@@ -15,31 +15,40 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.min
 
 // a.k.a. ЖМЫХ
+// https://www.youtube.com/watch?v=6NcIJXTlugc
+// https://en.wikipedia.org/wiki/Seam_carving
 @OptIn(ExperimentalEncodingApi::class)
 fun SeamCarving(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>){
     GlobalScope.launch {
         val bitmap = toBitmap(img)
         var pixels = IntArray(bitmap.width * bitmap.height)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        bitmap.recycle()
 
         val targetWidth = bitmap.width - args[0]
         val targetHeight = bitmap.height - args[0]
         var cWidth = bitmap.width
         var cHeight = bitmap.height
 
+        bitmap.recycle()
+
+        if(targetWidth <= 0 || targetHeight <= 0)
+            return@launch
+
         while (cWidth > targetWidth) {
             pixels = removeVerticalSeam(pixels, cWidth, cHeight)
             cWidth--
         }
 
+        pixels = rotate(pixels, cWidth, cHeight, false)
+
         while (cHeight > targetHeight) {
-            pixels = removeHorizontalSeam(pixels, cWidth, cHeight)
+            pixels = removeVerticalSeam(pixels, cHeight, cWidth)
             cHeight--
         }
 
-        val outputBitmap =
-            Bitmap.createBitmap(cWidth, cHeight, Bitmap.Config.ARGB_8888)
+        pixels = rotate(pixels, cHeight, cWidth, true)
+
+        val outputBitmap = Bitmap.createBitmap(cWidth, cHeight, Bitmap.Config.ARGB_8888)
         outputBitmap.setPixels(pixels, 0, cWidth, 0, 0, cWidth, cHeight)
         updateScreen(outputBitmap, viewModelInstance)
     }
@@ -51,21 +60,21 @@ fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
     val cumulativeEnergy = IntArray(width * height)
     val seamPath = IntArray(height)
 
-    for (y in 0 until height) {
-        for (x in 0 until width) {
+    repeat(height) { y ->
+        repeat(width) { x ->
             val i = y * width + x
             energy[i] = computeEnergy(pixels, width, height, x, y)
         }
     }
 
-    for (x in 0 until width) {
+    repeat(width) { x ->
         cumulativeEnergy[x] = energy[x]
     }
 
-    for (y in 1 until height) {
-        for (x in 0 until width) {
-            val i = y * width + x
-            cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width,y - 1, x)
+    repeat(height - 1) { y ->
+        repeat(width) { x ->
+            val i = (y + 1) * width + x
+            cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width,y, x)
         }
     }
 
@@ -80,9 +89,9 @@ fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
         seamPath[y] = findMinIndex(cumulativeEnergy, width, y, seamPath[y + 1])
     }
 
-    for (y in 0 until height) {
+    repeat(height) { y ->
         var newX = 0
-        for (x in 0 until width) {
+        repeat(width) { x ->
             if (x != seamPath[y]) {
                 outputPixels[y * (width - 1) + newX] = pixels[y * width + x]
                 newX++
@@ -93,16 +102,10 @@ fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
     return outputPixels
 }
 
-fun removeHorizontalSeam(pixels: IntArray, width: Int, height: Int): IntArray {
-    val rotatedBitmap = rotate(pixels, width, height, false)
-    val carvedBitmap = removeVerticalSeam(rotatedBitmap, height, width)
-    return rotate(carvedBitmap, height - 1, width,  true)
-}
-
 fun rotate(pixels: IntArray, width: Int, height: Int, right: Boolean = false): IntArray {
     val outputPixels = IntArray(width * height)
-    for (y in 0 until height) {
-        for (x in 0 until width) {
+    repeat(height) { y ->
+        repeat(width) { x ->
             var outX = y
             var outY = width - x - 1
 
