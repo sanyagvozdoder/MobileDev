@@ -60,7 +60,7 @@ fun Grayscale(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:Lis
             updateScreen(outputBitmap, viewModelInstance)
         }
 
-        val config = ImageProcessorConfig(bitmap, processPixel, 100, "ALGO_GRAYSCALE")
+        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_GRAYSCALE")
         val processor = ImageProcessor(config = config)
         processor.process(makeNewBitmap).join()
     }

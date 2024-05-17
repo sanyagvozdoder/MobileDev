@@ -71,7 +71,7 @@ fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List
             updateScreen(outputBitmap, viewModelInstance)
         }
 
-        val config = ImageProcessorConfig(bitmap, processPixel, 100, "ALGO_CONTRAST")
+        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_CONTRAST")
         val processor = ImageProcessor(config = config)
         processor.process(makeNewBitmap).join()
     }
