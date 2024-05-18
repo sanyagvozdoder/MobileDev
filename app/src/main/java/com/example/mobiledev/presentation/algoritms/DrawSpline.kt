@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.PointerInputScope
 import com.example.mobiledev.presentation.algoritms.util.SplineDot
+import com.example.mobiledev.presentation.algoritms.util.SplineMode
 import com.example.mobiledev.presentation.algoritms.util.VectorScreenMode
 
 fun PointerInputScope.OnTap(dots:List<SplineDot>, point: Offset, selectionCallback: (s: Int) -> Unit) {
@@ -61,16 +62,24 @@ fun bezierPoint(t: Float, points: List<Offset>): Offset{
 }
 
 fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
-                         selectedIndex:Int, selectionMode:Boolean){
+                         selectedIndex:Int, selectionMode:Boolean, splineMode: SplineMode){
     //spline
     dots.forEachIndexed{index,dot->
-        if (dots.size >= 2 && index != 0){
-
+        if (dots.size >= 2 && (splineMode == SplineMode.LINE && index != 0 ||
+                    splineMode == SplineMode.SHAPE)){
             val step = 0.05f
 
             var t = 0f;
-            var lastPoint = dots[index - 1].position
-            val points = arrayListOf(dots[index - 1].position, dots[index - 1].anchor, dots[index].position)
+
+            var lastPoint = dots[dots.size - 1].position
+            var points = arrayListOf(dots[dots.size - 1].position, dots[dots.size - 1].anchor, dots[index].position)
+
+
+            if(index != 0)
+            {
+                lastPoint = dots[index - 1].position
+                points = arrayListOf(dots[index - 1].position, dots[index - 1].anchor, dots[index].position)
+            }
             while (t <= 1f + step) {
                 val p = bezierPoint(t, points)
                 drawLine(
@@ -122,7 +131,7 @@ fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
                     anchorColor = Color.Blue
             }
 
-            if(index != dots.size - 1){
+            if(index != dots.size - 1 || splineMode == SplineMode.SHAPE){
                 drawCircle(
                     color = anchorColor,
                     radius = anchorRadius,
@@ -137,10 +146,14 @@ fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
                     cap = StrokeCap.Round
                 )
 
+                var next = index + 1
+                if(index == dots.size - 1 && splineMode == SplineMode.SHAPE)
+                    next = 0
+
                 // to next
                 drawLine(
                     color = anchorColor,
-                    start = dots[index + 1].position,
+                    start = dots[next].position,
                     end = dot.anchor,
                     strokeWidth = 2f,
                     cap = StrokeCap.Round
