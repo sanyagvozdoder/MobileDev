@@ -26,7 +26,12 @@ fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<I
         var pixels = IntArray(bitmap.width * bitmap.height)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
-        val angle = args[0].toDouble()
+        val angleI = args[0]
+
+        if(angleI == 0)
+            return@launch
+
+        val angle = angleI.toDouble()
 
         val dim = getNewDimensions(bitmap.width, bitmap.height, angle)
         val newWidth = dim.width
@@ -41,24 +46,23 @@ fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<I
 }
 
 // https://ip76.ru/theory-and-practice/rotate-rect/
-// + немножко умение решать системы уравнений
 fun getNewDimensions(width: Int, height: Int, angleInDegrees: Double): Size {
     val radianAngle = Math.toRadians(angleInDegrees)
 
     val sin = abs(sin(radianAngle))
     val cos = abs(cos(radianAngle))
 
-    val newHeight = (width * sin - height * cos)/(sin * sin - cos * cos) //(width * sin + height * cos).roundToInt()
-    val newWidth = (height - newHeight * cos)/sin//(width * cos + height * sin).roundToInt()
+    val newHeight = (width * sin + height * cos).roundToInt()
+    val newWidth = (width * cos + height * sin).roundToInt()
 
-    return Size(newWidth.roundToInt(), newHeight.roundToInt())
+    return Size(newWidth, newHeight)
 }
 
 fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Double): IntArray {
     val radianAngle = Math.toRadians(angleInDegrees)
 
-    val sin = abs(sin(radianAngle))
-    val cos = abs(cos(radianAngle))
+    val sin = sin(radianAngle)
+    val cos = cos(radianAngle)
 
     val dim = getNewDimensions(width, height, angleInDegrees)
     val newWidth = dim.width
@@ -85,6 +89,10 @@ fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Doubl
             if (origX in 0 until width && origY in 0 until height)
             {
                 rotatedImage[i] = pixels[origI]
+            }
+            else
+            {
+                rotatedImage[i] = Color.WHITE
             }
         }
     }

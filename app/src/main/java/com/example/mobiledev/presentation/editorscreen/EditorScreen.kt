@@ -217,7 +217,7 @@ val sliderElelements = listOf(
 )
 
 val settings = listOf(
-    SettingsItems(1, listOf("Угол поворота"), listOf<Pair<Int,Int>>(Pair(-179, 180))),
+    SettingsItems(1, listOf("Угол поворота"), listOf<Pair<Int,Int>>(Pair(-180, 180))),
     SettingsItems(1, listOf("Коэфицент масштабирования"), listOf<Pair<Int,Int>>(Pair(50, 200))),
     SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
