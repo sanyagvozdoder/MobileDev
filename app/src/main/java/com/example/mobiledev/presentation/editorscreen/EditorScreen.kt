@@ -26,9 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,8 +63,10 @@ import java.security.AccessController.getContext
 import androidx.compose.runtime.Composable as Composable
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.example.mobiledev.presentation.algoritms.UnsharpMask
+import com.example.mobiledev.presentation.algoritms.SeamCarving
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +149,7 @@ fun EditorScreen(
                             .align(Alignment.Center)
                     ){
                         AsyncImage(
-                            model = stateUri,
+                            model = stateUri.currentValue.value,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -174,7 +174,7 @@ fun EditorScreen(
                                 onAcceptClick = if(settingsState != -1 ) functionsAlghoritms[settingsState] else functionsAlghoritms[0],
                                 sliders = if(settingsState != -1 ) settings[settingsState] else null,
                                 editorScreenViewModel = editViewModel,
-                                byteArray = readBytes(context,stateUri)
+                                byteArray = readBytes(context,stateUri.currentValue.value)
                             )
                         }
                     }
@@ -190,6 +190,7 @@ fun EditorScreen(
                             )
                             editViewModel.onSliderStateUpdate(true)
                         },
+                        isEnabled = true
                     )
                 }
             }
@@ -213,17 +214,19 @@ val sliderElelements = listOf(
     sliderElement(4, R.drawable.ic_filter,R.string.filters),
     sliderElement(5, R.drawable.ic_retouch,R.string.retouching),
     sliderElement(6, R.drawable.ic_spiral,R.string.mask),
-    sliderElement(7, R.drawable.ic_spiral,R.string.mask),
+    sliderElement(7, R.drawable.ic_filter,R.string.filters), // жмых
+    sliderElement(8, R.drawable.ic_spiral,R.string.mask),
 )
 
 val settings = listOf(
-    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(1, listOf("Угол поворота"), listOf<Pair<Int,Int>>(Pair(-180, 180))),
     SettingsItems(1, listOf("Коэфицент масштабирования"), listOf<Pair<Int,Int>>(Pair(50, 200))),
     SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(1, listOf("Итераций",), listOf<Pair<Int,Int>>(Pair(1, 100))),
     SettingsItems(3, listOf("Порог", "Радиус", "Количество"), listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(0, 5)))
 )
 
@@ -235,6 +238,7 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) 
     ::Negative,
     ::Scaling,
     ::Scaling,
+    ::SeamCarving,
     ::UnsharpMask,
 )
 

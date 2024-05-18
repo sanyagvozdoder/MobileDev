@@ -96,7 +96,7 @@ fun Scaling(img:ByteArray?, viewModelInstance:EditorScreenViewModel, args:List<I
             updateScreen(outputBitmap, viewModelInstance)
         }
 
-        val config = ImageProcessorConfig(bitmap, processPixel, 100, "ALGO_SCALING")
+        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_SCALING")
         val processor = ImageProcessor(config = config)
         processor.process(makeNewBitmap).join()
     }

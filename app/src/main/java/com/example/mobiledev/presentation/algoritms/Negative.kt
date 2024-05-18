@@ -57,7 +57,7 @@ fun Negative(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List
             updateScreen(outputBitmap, viewModelInstance)
         }
 
-        val config = ImageProcessorConfig(bitmap, processPixel, 100, "ALGO_NEGATIVE")
+        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_NEGATIVE")
         val processor = ImageProcessor(config = config)
         processor.process(makeNewBitmap).join()
     }

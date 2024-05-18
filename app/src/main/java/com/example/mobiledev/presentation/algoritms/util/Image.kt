@@ -6,6 +6,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Environment
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -41,4 +46,40 @@ fun generateUri(image:Bitmap): Uri {
     ostream.close()
     image.recycle()
     return Uri.fromFile(file)
+}
+
+fun transpose(bitmap: Bitmap, right: Boolean = false) =
+    GlobalScope.async<Bitmap>(Dispatchers.Default, start = CoroutineStart.LAZY) {
+        val outputWidth = bitmap.height
+        val outputHeight = bitmap.width
+        val outputBitmap =
+                Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
+
+        val outputPixels = IntArray(outputWidth * outputHeight)
+
+        val processPixel = { x: Int, y: Int, color: Int ->
+            var outX = y
+            var outY = outputHeight - x - 1
+
+            if(right)
+            {
+                outX = outputWidth - y - 1
+                outY = x
+            }
+
+            val i = outY * outputWidth + outX
+            outputPixels[i] = color
+        }
+
+        val makeNewBitmap: () -> Unit = {
+            bitmap.recycle()
+
+            outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
+
+        }
+
+        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_ROTATE")
+        val processor = ImageProcessor(config = config)
+        processor.process(makeNewBitmap).join()
+        outputBitmap
 }

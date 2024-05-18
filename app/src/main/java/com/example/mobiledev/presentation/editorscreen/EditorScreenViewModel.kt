@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,6 +14,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.ActivityNavigatorExtras
+import com.example.mobiledev.presentation.undoredostates.StateSaver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,15 +22,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class EditorScreenViewModel:ViewModel() {
-    private val _stateUriFlow = MutableStateFlow<Uri?>(null)
+    private val _stateUri = MutableStateFlow<StateSaver>(StateSaver(null))
 
-    val stateUriFlow: StateFlow<Uri?>
-        get() = _stateUriFlow
+    val stateUriFlow: StateFlow<StateSaver>
+        get() = _stateUri
 
     fun onStateUpdate(newImage:Uri?){
-        viewModelScope.launch{
-            _stateUriFlow.emit(newImage)
-        }
+        _stateUri.value.update(newImage)
     }
 
     private val _isSliderVisible = MutableStateFlow<Boolean>(false)
