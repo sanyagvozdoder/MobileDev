@@ -65,6 +65,7 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import com.example.mobiledev.presentation.algoritms.UnsharpMask
 import com.example.mobiledev.presentation.algoritms.SeamCarving
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -214,6 +215,7 @@ val sliderElelements = listOf(
     sliderElement(5, R.drawable.ic_retouch,R.string.retouching),
     sliderElement(6, R.drawable.ic_spiral,R.string.mask),
     sliderElement(7, R.drawable.ic_filter,R.string.filters), // жмых
+    sliderElement(8, R.drawable.ic_spiral,R.string.mask),
 )
 
 val settings = listOf(
@@ -225,6 +227,7 @@ val settings = listOf(
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(1, listOf("Итераций",), listOf<Pair<Int,Int>>(Pair(1, 100))),
+    SettingsItems(3, listOf("Порог", "Радиус", "Количество"), listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(0, 5)))
 )
 
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) -> Unit>(
@@ -235,7 +238,8 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) 
     ::Negative,
     ::Scaling,
     ::Scaling,
-    ::SeamCarving
+    ::SeamCarving,
+    ::UnsharpMask,
 )
 
 @Throws(IOException::class)

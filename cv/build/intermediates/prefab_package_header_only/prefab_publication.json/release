@@ -1,5 +1,5 @@
 {
-  "installationFolder": "C:\\Users\\user\\MobileDev2\\cv\\build\\intermediates\\prefab_package\\release\\prefab",
+  "installationFolder": "C:\\Users\\User\\MobileDev\\cv\\build\\intermediates\\prefab_package\\release\\prefab",
   "gradlePath": ":cv",
   "packageInfo": {
     "packageName": "cv",
@@ -8,7 +8,7 @@
     "modules": [
       {
         "moduleName": "opencv_jni_shared",
-        "moduleHeaders": "C:\\Users\\user\\MobileDev2\\cv\\native\\jni\\include",
+        "moduleHeaders": "C:\\Users\\User\\MobileDev\\cv\\native\\jni\\include",
         "moduleExportLibraries": [],
         "abis": []
       }
