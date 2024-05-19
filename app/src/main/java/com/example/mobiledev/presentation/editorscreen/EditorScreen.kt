@@ -67,7 +67,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.example.mobiledev.presentation.algoritms.UnsharpMask
 import com.example.mobiledev.presentation.algoritms.SeamCarving
-
+import com.example.mobiledev.presentation.algoritms.Retouch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
@@ -224,10 +224,11 @@ val settings = listOf(
     SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
-    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(1, listOf("Сила %"), listOf<Pair<Int,Int>>(Pair(0, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(1, listOf("Итераций",), listOf<Pair<Int,Int>>(Pair(1, 100))),
-    SettingsItems(3, listOf("Порог", "Радиус", "Количество"), listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(0, 5)))
+    SettingsItems(3, listOf("Порог", "Радиус", "Количество"), listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(1, 50))),
+
 )
 
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) -> Unit>(
@@ -236,7 +237,7 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) 
     ::Contrast,
     ::Grayscale,
     ::Negative,
-    ::Scaling,
+    ::Retouch,
     ::Scaling,
     ::SeamCarving,
     ::UnsharpMask,

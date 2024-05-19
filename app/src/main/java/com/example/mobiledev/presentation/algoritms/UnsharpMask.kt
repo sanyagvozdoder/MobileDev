@@ -36,7 +36,7 @@ fun UnsharpMask(img:ByteArray?, viewModelInstance:EditorScreenViewModel, args:Li
 
     val threshold = args[0];
     val radius = args[1];
-    val amount = args[2];
+    val amount : Float= args[2].toFloat() / 10;
 
     val bitmap = toBitmap(img)
     val width = bitmap.width
