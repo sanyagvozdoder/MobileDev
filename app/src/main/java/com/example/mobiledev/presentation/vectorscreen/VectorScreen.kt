@@ -55,6 +55,7 @@ import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.DrawSpline
 import com.example.mobiledev.presentation.algoritms.OnTap
 import com.example.mobiledev.presentation.algoritms.util.SplineDot
+import com.example.mobiledev.presentation.algoritms.util.SplineMode
 import com.example.mobiledev.presentation.algoritms.util.VectorScreenMode
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
@@ -87,6 +88,10 @@ fun VectorScreen(
 
     var mode by remember {
         mutableStateOf(VectorScreenMode.DRAW)
+    }
+
+    var splineMode by remember {
+        mutableStateOf(SplineMode.LINE)
     }
 
     ModalNavigationDrawer(
@@ -170,6 +175,7 @@ fun VectorScreen(
                                             prevDot.position - (prevDot.position - offset) / 2f
                                     }
                                     dots.add(SplineDot(offset, offset))
+                                    dots[dots.size - 1].anchor = dots[0].position - (dots[0].position - offset) / 2f
                                 } else {
                                     selectionMode = false
                                     OnTap(dots, offset, { i ->
@@ -179,13 +185,13 @@ fun VectorScreen(
                             }
                         }
                 ){
-                    DrawSpline(dots, mode, selectedDot, selectionMode)
+                    DrawSpline(dots, mode, selectedDot, selectionMode, splineMode)
                 }
                 Row {
                     if (mode == VectorScreenMode.DRAW)
                     {
                         Button(
-                            modifier = Modifier.fillMaxWidth(),
+                            //modifier = Modifier.fillMaxWidth(),
                             onClick = {
                                 mode = VectorScreenMode.EDIT
                             }
@@ -196,7 +202,7 @@ fun VectorScreen(
                     else
                     {
                         Button(
-                            modifier = Modifier.fillMaxWidth(),
+                            //modifier = Modifier.fillMaxWidth(),
                             onClick = {
                                 mode = VectorScreenMode.DRAW
                                 selectedDot = -1
@@ -204,6 +210,28 @@ fun VectorScreen(
                             }
                         ) {
                             Text(text = "Редактирование")
+                        }
+                    }
+                    if (splineMode == SplineMode.LINE)
+                    {
+                        Button(
+                            //modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                splineMode = SplineMode.SHAPE
+                            }
+                        ) {
+                            Text(text = "Линия")
+                        }
+                    }
+                    else
+                    {
+                        Button(
+                            //modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                splineMode = SplineMode.LINE
+                            }
+                        ) {
+                            Text(text = "Фигура")
                         }
                     }
                 }
