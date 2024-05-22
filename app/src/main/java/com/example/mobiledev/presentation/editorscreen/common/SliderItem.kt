@@ -45,7 +45,7 @@ fun LazyItemScope.SliderItem(
             modifier = Modifier
                 .border(1.dp, Color.Black, CircleShape)
                 .align(Alignment.CenterHorizontally)
-                .size(IconSize * 4)
+                .size(IconSize * 3)
                 .clickable(onClick = {
                     vmInst.onSliderStateUpdate(false)
                     vmInst.onSettingsStateUpdate(index)
@@ -64,7 +64,7 @@ fun LazyItemScope.SliderItem(
                 .padding(vertical = 5.dp)
                 .align(Alignment.CenterHorizontally),
             text = stringResource(id = text),
-            fontSize = 10.sp
+            fontSize = 8.sp
         )
     }
 }

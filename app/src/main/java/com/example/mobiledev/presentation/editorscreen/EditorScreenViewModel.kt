@@ -1,6 +1,7 @@
 package com.example.mobiledev.presentation.editorscreen
 
 import android.net.Uri
+import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -10,16 +11,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.ActivityNavigatorExtras
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.undoredostates.StateSaver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
 class EditorScreenViewModel:ViewModel() {
     private val _stateUri = MutableStateFlow<StateSaver>(StateSaver(null))
@@ -52,4 +56,10 @@ class EditorScreenViewModel:ViewModel() {
             _settingsState.emit(state)
         }
     }
+}
+
+fun generateNewFile():File{
+    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val file = File.createTempFile("newImage", ".jpg", downloadsDir)
+    return file
 }

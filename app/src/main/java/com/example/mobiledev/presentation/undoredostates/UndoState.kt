@@ -15,6 +15,7 @@ class StateSaver(
     fun update(newValue:Uri?){
         currentValue.value = newValue
         undoQueue.addLast(newValue)
+        redoQueue.clear()
     }
 
     fun undo(){

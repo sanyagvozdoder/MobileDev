@@ -86,4 +86,7 @@ dependencies {
 
     //coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
+    //camera
+    implementation("androidx.fragment:fragment-ktx:1.7.1")
 }
