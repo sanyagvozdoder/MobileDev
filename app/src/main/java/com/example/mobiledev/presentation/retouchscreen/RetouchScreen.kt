@@ -75,13 +75,13 @@ fun RetouchScreen(
         mutableStateOf(30)
     }
 
+    var strenght by remember {
+        mutableStateOf(50f)
+    }
+
     var workSpaceSize by remember { mutableStateOf(IntSize.Zero) }
 
     val context = LocalContext.current
-
-    var motionEvent by remember { mutableStateOf(MotionEvent.Idle) }
-    var currentPosition by remember { mutableStateOf(Offset.Unspecified) }
-    var previousPosition by remember { mutableStateOf(Offset.Unspecified) }
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -151,7 +151,6 @@ fun RetouchScreen(
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 dots.add(it)
-                                //Log.d("ЖОПА", getMaskFactor(dots, currentRadius, it).toString())
                             }
                         }
                 ){
@@ -168,50 +167,14 @@ fun RetouchScreen(
                             .onGloballyPositioned { coordinates ->
                                 workSpaceSize = coordinates.size
                             }
-                            .pointerInput(Unit) {
-                                /*detectDragGestures(
-                                    onDragStart = { offset ->
-                                        dots.add(offset)
-                                        currentPosition = offset
-                                        motionEvent = MotionEvent.Down
-                                    },
-                                    onDragEnd = {
-                                        applyRetouch(readBytes(context, stateUri.currentValue.value),
-                                            viewModel, dots, currentRadius, workSpaceSize)
-                                        motionEvent = MotionEvent.Up
-                                        dots.clear()
-                                    }
-                                ) { change, dragAmount ->
-                                    dots.add(change.position)
-                                    currentPosition = change.position
-                                    motionEvent = MotionEvent.Move
-                                    change.consume()
-                                }*/
-                            }
                     ){
-                        dots.forEachIndexed{ index, dot ->
-                            /*if(index > 0)
-                            {
-                                drawLine(
-                                    Color(0f, 0f, 0f),
-                                    dots[index - 1],
-                                    dots[index],
-                                    strokeWidth = currentRadius.toFloat(),
-                                    cap = StrokeCap.Round
-                                )
-                            }*/
+                        dots.forEach{ dot ->
                             drawCircle(
                                 color = Color.Black,
                                 radius = currentRadius.toFloat(),
                                 center = dot
                             )
                         }
-                        /*drawPoints(
-                            dots,
-                            PointMode.Lines,
-                            color = Color(0f, 0f, 0f, 0.7f),
-                            strokeWidth = currentRadius.toFloat()
-                        )*/
                     }
                 }
                 Row(
@@ -242,11 +205,28 @@ fun RetouchScreen(
                     )
                 }
                 Row {
+                    Text(text = "Сила (%): " + strenght.toInt().toString(),
+                        modifier = Modifier.fillMaxWidth(0.2f))
+                    androidx.compose.material3.Slider(
+                        value = strenght,
+                        onValueChange = {newValue->
+                            strenght = newValue
+                        },
+                        valueRange = 0f..100f,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+                Row {
                     Button(
                         onClick = {
-                            applyRetouch(readBytes(context, stateUri.currentValue.value),
-                                viewModel, dots, currentRadius, workSpaceSize)
-                            dots.clear()
+                            applyRetouch(readBytes(context, stateUri.currentValue.value), strenght,
+                                { uri ->
+                                    viewModel.onStateUpdate(uri)
+                                    dots.clear()
+                                }
+                                , dots, currentRadius, workSpaceSize)
+                            //
                         }
                     ) {
                         Text(text = "launch")
