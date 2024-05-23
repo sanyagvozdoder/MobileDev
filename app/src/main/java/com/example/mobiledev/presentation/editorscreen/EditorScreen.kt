@@ -8,15 +8,23 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -26,7 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -63,11 +73,13 @@ import java.security.AccessController.getContext
 import androidx.compose.runtime.Composable as Composable
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import com.example.mobiledev.presentation.algoritms.UnsharpMask
+import androidx.compose.ui.res.painterResource
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.mobiledev.presentation.algoritms.SeamCarving
-import com.example.mobiledev.presentation.algoritms.Retouch
+import org.opencv.BuildConfig
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
@@ -83,6 +95,21 @@ fun EditorScreen(
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = {uri-> editViewModel.onStateUpdate(uri)}
+    )
+
+    var uriForCapturing:Uri = FileProvider.getUriForFile(
+        context,
+        context.applicationContext.packageName.toString() + ".provider",
+        generateNewFile()
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = {success->
+            if(success){
+                editViewModel.onStateUpdate(uriForCapturing)
+            }
+        }
     )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -136,58 +163,105 @@ fun EditorScreen(
         ) {
             Column(
                 modifier = Modifier
+                    .padding(it)
                     .fillMaxSize()
-                    .padding(it),
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
+                Row(
+                    modifier = Modifier.fillMaxHeight(0.05f)
+                ) {
+                    Button(
+                        onClick = {
+                            stateUri.undo()
+                        },
+                        enabled = stateUri.undoSize() >= 2
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_undo),
+                            contentDescription = null,
+                            modifier = Modifier.size(AssistChipDefaults.IconSize)
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            stateUri.redo()
+                        },
+                        enabled = stateUri.redoSize() >= 2
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_redo),
+                            contentDescription = null,
+                            modifier = Modifier.size(AssistChipDefaults.IconSize)
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxSize(0.9f)
                 ){
-                    Column(
+                    AsyncImage(
+                        model = stateUri.currentValue.value,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .fillMaxHeight(0.85f)
-                            .align(Alignment.Center)
-                    ){
-                        AsyncImage(
-                            model = stateUri.currentValue.value,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(0.8f)
+                            .fillMaxHeight(0.8f)
+                    )
+
+                    Spacer(modifier = Modifier.height(3.dp))
+
+                    AnimatedVisibility(
+                        visible = sliderState,
+                        modifier = Modifier
+                            .padding(vertical = 25.dp)
+                    ) {
+                        Slider(
+                            modifier = Modifier.fillMaxSize(),
+                            items = sliderElelements,
+                            vmInst = editViewModel
                         )
-
-                        Spacer(Modifier.fillMaxHeight(0.2f))
-
-                        AnimatedVisibility(
-                            visible = sliderState
-                        ) {
-                            Slider(
-                                modifier = Modifier.fillMaxSize(),
-                                items = sliderElelements,
-                                vmInst = editViewModel
-                            )
-                        }
-
-                        AnimatedVisibility(visible = settingsState != -1) {
-                            SettingsTools(
-                                onAcceptClick = if(settingsState != -1 ) functionsAlghoritms[settingsState] else functionsAlghoritms[0],
-                                sliders = if(settingsState != -1 ) settings[settingsState] else null,
-                                editorScreenViewModel = editViewModel,
-                                byteArray = readBytes(context,stateUri.currentValue.value)
-                            )
-                        }
                     }
 
+                    AnimatedVisibility(visible = settingsState != -1, modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(vertical = 20.dp)) {
+                        SettingsTools(
+                            onAcceptClick = if(settingsState != -1 ) functionsAlghoritms[settingsState] else functionsAlghoritms[0],
+                            sliders = if(settingsState != -1 ) settings[settingsState] else null,
+                            editorScreenViewModel = editViewModel,
+                            byteArray = readBytes(context,stateUri.currentValue.value)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     IconButton(
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
                             .padding(horizontal = 5.dp, vertical = 5.dp),
                         icon = R.drawable.ic_pic,
                         onClick = {
                             pickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
+                            editViewModel.onSliderStateUpdate(true)
+                        },
+                        isEnabled = true
+                    )
+                    IconButton(
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp, vertical = 5.dp),
+                        icon = R.drawable.ic_pic,
+                        onClick = {
+                            uriForCapturing = FileProvider.getUriForFile(
+                                context,
+                                context.applicationContext.packageName.toString() + ".provider",
+                                generateNewFile()
+                            )
+                            cameraLauncher.launch(uriForCapturing)
                             editViewModel.onSliderStateUpdate(true)
                         },
                         isEnabled = true
@@ -215,20 +289,17 @@ val sliderElelements = listOf(
     sliderElement(5, R.drawable.ic_retouch,R.string.retouching),
     sliderElement(6, R.drawable.ic_spiral,R.string.mask),
     sliderElement(7, R.drawable.ic_filter,R.string.filters), // жмых
-    sliderElement(8, R.drawable.ic_spiral,R.string.mask),
 )
 
 val settings = listOf(
-    SettingsItems(1, listOf("Угол поворота"), listOf<Pair<Int,Int>>(Pair(-180, 180))),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(1, listOf("Коэфицент масштабирования"), listOf<Pair<Int,Int>>(Pair(50, 200))),
     SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
-    SettingsItems(1, listOf("Сила %"), listOf<Pair<Int,Int>>(Pair(0, 100))),
+    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(1, listOf("Итераций",), listOf<Pair<Int,Int>>(Pair(1, 100))),
-    SettingsItems(3, listOf("Порог", "Радиус", "Количество"), listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(1, 50))),
-
 )
 
 val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) -> Unit>(
@@ -237,13 +308,13 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) 
     ::Contrast,
     ::Grayscale,
     ::Negative,
-    ::Retouch,
     ::Scaling,
-    ::SeamCarving,
-    ::UnsharpMask,
+    ::Scaling,
+    ::SeamCarving
 )
 
 @Throws(IOException::class)
-private fun readBytes(context: Context, uri: Uri?): ByteArray? =
+fun readBytes(context: Context, uri: Uri?): ByteArray? =
     uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() } }
+
 
