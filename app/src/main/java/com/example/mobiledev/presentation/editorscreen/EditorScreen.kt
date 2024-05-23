@@ -1,7 +1,5 @@
 package com.example.mobiledev.presentation.editorscreen
 
-import android.annotation.SuppressLint
-import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -9,7 +7,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,23 +28,19 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -58,6 +50,8 @@ import com.example.mobiledev.presentation.algoritms.Grayscale
 import com.example.mobiledev.presentation.algoritms.Negative
 import com.example.mobiledev.presentation.algoritms.Rotate
 import com.example.mobiledev.presentation.algoritms.Scaling
+import com.example.mobiledev.presentation.algoritms.SeamCarving
+import com.example.mobiledev.presentation.algoritms.UnsharpMask
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsItems
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
@@ -66,19 +60,8 @@ import com.example.mobiledev.presentation.editorscreen.common.sliderElement
 import com.example.mobiledev.presentation.navgraph.Route
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import com.example.mobiledev.presentation.sidebar.common.sideBarElement
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.security.AccessController.getContext
-import androidx.compose.runtime.Composable as Composable
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import com.example.mobiledev.presentation.algoritms.SeamCarving
-import org.opencv.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -277,7 +260,8 @@ val menuitems = listOf(
     sideBarElement(1, R.drawable.ic_cv, R.string.cv,Route.CVScreen.route),
     sideBarElement(2, R.drawable.ic_brokenline, R.string.vector,Route.VectorScreen.route),
     sideBarElement(3, R.drawable.ic_dots, R.string.biline, Route.BilineScreen.route),
-    sideBarElement(4, R.drawable.ic_cube, R.string.cube, Route.CubeScreen.route)
+    sideBarElement(4, R.drawable.ic_cube, R.string.cube, Route.CubeScreen.route),
+    sideBarElement(5, R.drawable.ic_retouch, R.string.retouching, Route.RetouchScreen.route)
 )
 
 val sliderElelements = listOf(
@@ -292,13 +276,14 @@ val sliderElelements = listOf(
 )
 
 val settings = listOf(
-    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(1, listOf("Угол"), listOf<Pair<Int,Int>>(Pair(-180, 180))),
     SettingsItems(1, listOf("Коэфицент масштабирования"), listOf<Pair<Int,Int>>(Pair(50, 200))),
     SettingsItems(1, listOf("Коэфицент контраста"), listOf<Pair<Int,Int>>(Pair(-100, 100))),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
     SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
-    SettingsItems(0, listOf(), listOf<Pair<Int,Int>>()),
+    SettingsItems(3, listOf("Порог", "Радиус", "Количество"),
+        listOf<Pair<Int,Int>>(Pair(0, 255), Pair(0, 100), Pair(0, 50))),
     SettingsItems(1, listOf("Итераций",), listOf<Pair<Int,Int>>(Pair(1, 100))),
 )
 
@@ -309,7 +294,7 @@ val functionsAlghoritms = listOf<(ByteArray?, EditorScreenViewModel, List<Int>) 
     ::Grayscale,
     ::Negative,
     ::Scaling,
-    ::Scaling,
+    ::UnsharpMask,
     ::SeamCarving
 )
 

@@ -2,71 +2,111 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.util.Log
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.core.graphics.set
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
-import com.example.mobiledev.presentation.algoritms.util.Rgb
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.algoritms.util.updateScreen
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
+import com.example.mobiledev.presentation.retouchscreen.RetouchScreenViewModel
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.*
-import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 
+fun applyRetouch(img:ByteArray?, viewModelInstance: RetouchScreenViewModel,
+                 points:List<Offset>, radius:Int, workSpaceSize: IntSize) {
+    GlobalScope.launch {
+        val image = toBitmap(img);
+        val strength = 1f // 0..1
+        val width = image.width
+        val height = image.height
+        val size = width * height
 
-@OptIn(ExperimentalEncodingApi::class)
+        val coefficientX = workSpaceSize.width.toFloat() / image.width
+        val coefficientY = workSpaceSize.height.toFloat() / image.height
 
-fun Retouch(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
+        val originalPixels = IntArray(size)
+        val retouchedPixels = IntArray(size)
 
-    val image = toBitmap(img);
-    val strength : Float = args[0].toFloat() / 100
-    val width = image.width
-    val height = image.height
-    val size = width * height
+        image.getPixels(originalPixels, 0, width, 0, 0, width, height)
+        image.getPixels(retouchedPixels, 0, width, 0, 0, width, height)
 
-    val originalPixels = IntArray(size)
-    image.getPixels(originalPixels, 0, width, 0, 0, width, height)
+        for (y in 0 until height) {
+            for (x in 0 until width) {
 
-    val retouchedPixels = IntArray(size)
-    for (y in 0 until height) {
-        for (x in 0 until width) {
-            val centerIndex = y * width + x
+                val wsX = x * coefficientX
+                val wsY = y * coefficientY
 
-            val neighbors = mutableListOf<Int>()
-            for (dy in -1..1) {
-                for (dx in -1..1) {
-                    if (dx == 0 && dy == 0) {
-                        continue
-                    }
-                    val neighborX = x + dx
-                    val neighborY = y + dy
-                    if (neighborX in 0 until width && neighborY in 0 until height) {
-                        neighbors.add(originalPixels[neighborY * width + neighborX])
+                val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+
+                if (factor <= 0.01f) continue
+                val centerIndex = y * width + x
+
+                val neighbors = mutableListOf<Int>()
+                for (dy in -1..1) {
+                    for (dx in -1..1) {
+                        if (dx == 0 && dy == 0) {
+                            continue
+                        }
+                        val neighborX = x + dx
+                        val neighborY = y + dy
+                        if (neighborX in 0 until width && neighborY in 0 until height) {
+                            neighbors.add(originalPixels[neighborY * width + neighborX])
+                        }
                     }
                 }
+
+                val retouchedColor = calculateRetouchedColor(
+                    originalPixels[centerIndex],
+                    neighbors,
+                    strength * minOf(factor + 0.5f, 1f)
+                )
+                retouchedPixels[centerIndex] = retouchedColor
             }
-
-            val retouchedColor = calculateRetouchedColor(originalPixels[centerIndex], neighbors, strength)
-            retouchedPixels[centerIndex] = retouchedColor
         }
-    }
 
-    updateScreen(Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888), viewModelInstance)
+        updateScreen(
+            Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888),
+            viewModelInstance
+        )
+    }
 }
 
+fun getMaskFactor(spline: List<Offset>, radius: Int, p0: Offset) : Float {
+    var minDist = radius + 100f
+
+    // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+    spline.forEachIndexed { i, p1 ->
+        /*if(i > 0)
+        {
+            val p1 = spline[i - 1]
+            val p2 = spline[i]
+
+            if(p0.x in p1.x - radius..p2.x + radius
+                || p0.x in p2.x - radius..p1.x + radius
+                && p0.y in p1.y - radius..p2.y + radius
+                || p0.y in p2.y - radius..p1.y + radius)
+            {
+                val dx = p2.x - p1.x
+                val dy = p2.y - p1.y
+                val len = sqrt(dx * dx + dy * dy)
+                val verx = abs((p2.x - p1.x) * (p0.y - p1.y) -
+                        (p0.x - p1.x) * (p2.y - p1.y))
+
+                val distance = verx / len
+
+                if(!distance.isNaN())
+                    minDist = minOf(minDist, distance)
+            }
+            //Log.d("ЖОПА СРАКА", "len: " + len.toString() + "verx:" + verx.toString() + " d: " + distance.toString())
+        }*/
+        val dx = p0.x - p1.x
+        val dy = p0.y - p1.y
+        val distance = sqrt(dx * dx + dy * dy)
+        minDist = minOf(minDist, distance)
+    }
+
+    return 1f - minOf(minDist / radius, 1f)
+}
 
 fun calculateRetouchedColor(centerColor: Int, neighbors: List<Int>, strength: Float): Int {
     val red = Color.red(centerColor)

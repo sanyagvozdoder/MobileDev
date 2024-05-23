@@ -8,5 +8,6 @@ sealed class Route(
     object VectorScreen:Route(route = "vectorScreen")
     object BilineScreen:Route(route = "bilineScreen")
     object CubeScreen:Route(route = "CubeScreen")
+    object RetouchScreen:Route(route = "RetouchScreen")
 
 }

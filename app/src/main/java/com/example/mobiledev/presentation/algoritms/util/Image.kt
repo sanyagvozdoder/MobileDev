@@ -6,11 +6,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Environment
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
+import com.example.mobiledev.presentation.retouchscreen.RetouchScreenViewModel
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -35,6 +35,10 @@ fun writeRGBA(pixel:Rgb):Int {
 }
 
 fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
+    viewModelInstance.onStateUpdate(generateUri(image))
+}
+
+fun updateScreen(image:Bitmap, viewModelInstance: RetouchScreenViewModel){
     viewModelInstance.onStateUpdate(generateUri(image))
 }
 
