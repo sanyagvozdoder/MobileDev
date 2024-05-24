@@ -23,15 +23,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -102,7 +103,7 @@ fun VectorScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Редактор сплайнов", color = Color.White)
+                        Text(text = stringResource(id = R.string.vector), color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -249,10 +250,9 @@ fun VectorScreen(
                 }
                 Row {
                     if(mode == VectorScreenMode.DRAW)
-                        Text(text = "Нажмите, чтобы разместить точку.")
+                        Text(text = stringResource(id = R.string.draw_mode_hint))
                     else
-                        Text(text = "Нажмите, чтобы выделить, удерживайте, чтобы переместить. " +
-                                "Двойное нажатие - переключение якорь/точка.")
+                        Text(text = stringResource(id = R.string.edit_mode_hint))
                 }
             }
         }

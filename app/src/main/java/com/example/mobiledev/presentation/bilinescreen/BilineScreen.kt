@@ -37,6 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -103,7 +104,7 @@ fun BilineScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Афинные преобразования", color = Color.White)
+                        Text(text = stringResource(id = R.string.biline), color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
