@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.net.Uri
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import kotlinx.coroutines.GlobalScope
@@ -31,35 +30,40 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
         val retouchedPixels = IntArray(size)
 
         image.getPixels(originalPixels, 0, width, 0, 0, width, height)
+        image.getPixels(retouchedPixels, 0, width, 0, 0, width, height)
 
         image.recycle()
 
-        ImageProcessor(
-            originalPixels,
-            width,
-            height
-        ) { x: Int, y: Int, color: Int ->
+        for (point in points) {
+            val x0 = maxOf((point.x - radius) / coefficientX, 0f).toInt()
+            val y0 = maxOf((point.y - radius) / coefficientY, 0f).toInt()
+            val x1 = minOf((point.x + radius) / coefficientX, width - 1f).toInt()
+            val y1 = minOf((point.y + radius) / coefficientY, height - 1f).toInt()
 
-            val wsX = x * coefficientX
-            val wsY = y * coefficientY
+            for(x in x0..x1)
+            {
+                for(y in y0..y1)
+                {
+                    val wsX = x * coefficientX
+                    val wsY = y * coefficientY
 
-            val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
-            val centerIndex = y * width + x
+                    val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+                    val centerIndex = y * width + x
 
-            if (factor >= 0.01f) {
+                    if (factor >= 0.01f) {
 
-                val neighbors = getNeighbors(x, y, width, height, originalPixels)
+                        val neighbors = getNeighbors(x, y, width, height, originalPixels)
 
-                val retouchedColor = calculateRetouchedColor(
-                    color,
-                    neighbors,
-                    strength * factor
-                )
-                retouchedPixels[centerIndex] = retouchedColor
-            } else {
-                retouchedPixels[centerIndex] = color
+                        val retouchedColor = calculateRetouchedColor(
+                            originalPixels[y * width + x],
+                            neighbors,
+                            strength * factor
+                        )
+                        retouchedPixels[centerIndex] = retouchedColor
+                    }
+                }
             }
-        }.process().join()
+        }
 
         val outputBitmap =
             Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
