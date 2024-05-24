@@ -122,7 +122,7 @@ fun VectorScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Редактор сплайнов", color = Color.White)
+                        Text(text = stringResource(id = R.string.vector), color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -155,14 +155,14 @@ fun VectorScreen(
                     ) {
                         if (screenMode.value == VectorScreenMode.DRAW)
                             Text(
-                                text = stringResource(id = R.string.dotspawn),
+                                text = stringResource(id = R.string.draw_mode_hint),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 fontSize = 10.sp
                             )
                         else
                             Text(
-                                text = stringResource(R.string.editspline),
+                                text = stringResource(R.string.edit_mode_hint),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 fontSize = 10.sp

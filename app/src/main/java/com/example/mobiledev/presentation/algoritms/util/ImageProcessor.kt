@@ -9,12 +9,26 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 
-class ImageProcessor(private val input: Bitmap,
+class ImageProcessor(private val width: Int,
+                     private val height: Int,
                      private val func: (x:Int, y:Int, color: Int) -> Unit) {
-    private val inPixels = IntArray(input.width * input.height)
 
-    private fun processLine(x0: Int, length:Int, width:Int, height:Int) = GlobalScope.launch(Dispatchers.Default,
-        start = CoroutineStart.LAZY){
+    private var inPixels = IntArray(width * height)
+
+    constructor(bitmap: Bitmap, func: (x:Int, y:Int, color: Int) -> Unit) :
+            this(bitmap.width, bitmap.height, func)
+    {
+        bitmap.getPixels(inPixels, 0, width, 0, 0, width, height)
+    }
+
+    constructor(pixels: IntArray, width: Int, height: Int, func: (x:Int, y:Int, color: Int) -> Unit) :
+            this(width, height, func)
+    {
+        inPixels = pixels
+    }
+
+    private fun processLine(x0: Int, length:Int, width:Int, height:Int) =
+        GlobalScope.launch(Dispatchers.Default, start = CoroutineStart.LAZY) {
 
         for (x in x0 until x0 + length)
         {
@@ -25,20 +39,18 @@ class ImageProcessor(private val input: Bitmap,
         }
     }
 
-    suspend fun process(onEnd:() -> Unit) = GlobalScope.launch(start = CoroutineStart.LAZY) {
-        input.getPixels(inPixels, 0, input.width, 0, 0,
-            input.width, input.height)
+    suspend fun process() =
+        GlobalScope.launch(start = CoroutineStart.LAZY) {
         val jobs = mutableListOf<Job>()
 
         val processorsNum = Runtime.getRuntime().availableProcessors()
-        val lineWidth = input.width / processorsNum
+        val lineWidth = width / processorsNum
 
-        for(start in 0 until input.width step lineWidth)
+        for(start in 0 until width step lineWidth)
         {
-            val length = minOf(lineWidth, input.width - start)
-            jobs.add(processLine(start, length, input.width, input.height))
+            val length = minOf(lineWidth, width - start)
+            jobs.add(processLine(start, length, width, height))
         }
         jobs.joinAll()
-        onEnd.invoke()
     }
 }

@@ -41,6 +41,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -118,7 +119,7 @@ fun RetouchScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Ретуширование", color = Color.White)
+                        Text(text = stringResource(id = R.string.retouching), color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -191,7 +192,7 @@ fun RetouchScreen(
                     )
                 }
                 Row {
-                    Text(text = "Радиус кисти: " + currentRadius.toString(),
+                    Text(text = stringResource(id = R.string.radius) + ": " + currentRadius.toString(),
                         modifier = Modifier.fillMaxWidth(0.2f))
                     androidx.compose.material3.Slider(
                         value = currentRadius.toFloat(),
@@ -204,7 +205,7 @@ fun RetouchScreen(
                     )
                 }
                 Row {
-                    Text(text = "Сила (%): " + strenght.toInt().toString(),
+                    Text(text = stringResource(id = R.string.strength)+ "(%): " + strenght.toInt().toString(),
                         modifier = Modifier.fillMaxWidth(0.2f))
                     androidx.compose.material3.Slider(
                         value = strenght,
@@ -228,7 +229,7 @@ fun RetouchScreen(
                             //
                         }
                     ) {
-                        Text(text = "launch")
+                        Text(text = stringResource(id = R.string.launch))
                     }
                 }
             }

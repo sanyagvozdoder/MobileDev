@@ -5,12 +5,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.util.Size
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.Rgb
 import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.transpose
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -58,7 +54,7 @@ fun getNewDimensions(width: Int, height: Int, angleInDegrees: Double): Size {
     return Size(newWidth, newHeight)
 }
 
-fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Double): IntArray {
+suspend fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Double): IntArray {
     val radianAngle = Math.toRadians(angleInDegrees)
 
     val sin = sin(radianAngle)
@@ -75,27 +71,26 @@ fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Doubl
     val newCenterX = newWidth / 2
     val newCenterY = newHeight / 2
 
-    repeat(newHeight) { y ->
-        repeat(newWidth) { x ->
-            val dx = x - newCenterX
-            val dy = y - newCenterY
 
-            val origX = (cos * dx + sin * dy + centerX).roundToInt()
-            val origY = (-sin * dx + cos * dy + centerY).roundToInt()
+    ImageProcessor(
+        rotatedImage,
+        newWidth,
+        newHeight
+    ) { x, y, color ->
+        val dx = x - newCenterX
+        val dy = y - newCenterY
 
-            val origI = origX + origY * width
-            val i = y * newWidth + x
+        val origX = (cos * dx + sin * dy + centerX).roundToInt()
+        val origY = (-sin * dx + cos * dy + centerY).roundToInt()
 
-            if (origX in 0 until width && origY in 0 until height)
-            {
-                rotatedImage[i] = pixels[origI]
-            }
-            else
-            {
-                rotatedImage[i] = Color.WHITE
-            }
-        }
-    }
+        val origI = origX + origY * width
+        val i = y * newWidth + x
+
+        if (origX in 0 until width && origY in 0 until height)
+            rotatedImage[i] = pixels[origI]
+        else
+            rotatedImage[i] = Color.WHITE
+    }.process().join()
 
     return rotatedImage
 }

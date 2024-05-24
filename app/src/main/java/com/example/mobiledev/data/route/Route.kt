@@ -6,7 +6,7 @@ sealed class Route(
     object FilterScreen: Route(route="filterScreen")
     object CVScreen: Route(route = "cvScreen")
     object VectorScreen: Route(route = "vectorScreen")
-    object BilineScreen: Route(route = "bilineScreen")
+    object AfineScreen: Route(route = "afineScreen")
     object CubeScreen: Route(route = "CubeScreen")
     object RetouchScreen:Route(route = "RetouchScreen")
 }

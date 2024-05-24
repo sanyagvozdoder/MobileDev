@@ -38,16 +38,14 @@ fun Grayscale(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
             outputPixels[i] = writeRGBA(pixel)
         }
 
-        val makeNewBitmap = {
-            bitmap.recycle()
-
-            val outputBitmap =
-                Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
-            outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
-            onEnd(generateUri(outputBitmap))
-        }
-
         val processor = ImageProcessor(bitmap, processPixel)
-        processor.process(makeNewBitmap).join()
+        processor.process().join()
+
+        bitmap.recycle()
+
+        val outputBitmap =
+            Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
+        outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
+        onEnd(generateUri(outputBitmap))
     }
 }

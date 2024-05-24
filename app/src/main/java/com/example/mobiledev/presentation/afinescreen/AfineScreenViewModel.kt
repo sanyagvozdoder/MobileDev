@@ -1,4 +1,4 @@
-package com.example.mobiledev.presentation.bilinescreen
+package com.example.mobiledev.presentation.afinescreen
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class BilineScreenViewModel:ViewModel() {
+class AfineScreenViewModel:ViewModel() {
     private val _startUriFlow = MutableStateFlow<Uri?>(null)
 
     val startUriFlow: StateFlow<Uri?>

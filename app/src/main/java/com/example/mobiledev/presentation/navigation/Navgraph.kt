@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mobiledev.data.route.Route
-import com.example.mobiledev.presentation.bilinescreen.BilineScreen
+import com.example.mobiledev.presentation.afinescreen.AfineScreen
 import com.example.mobiledev.presentation.cubescreen.CubeScreen
 import com.example.mobiledev.presentation.cvscreen.CVScreen
 import com.example.mobiledev.presentation.editorscreen.EditorScreen
@@ -26,8 +26,8 @@ fun NavGraph(){
         composable(route = Route.VectorScreen.route){
             VectorScreen(navController)
         }
-        composable(route = Route.BilineScreen.route){
-            BilineScreen(navController = navController)
+        composable(route = Route.AfineScreen.route){
+            AfineScreen(navController = navController)
         }
         composable(route = Route.CVScreen.route){
             CVScreen(navController = navController)

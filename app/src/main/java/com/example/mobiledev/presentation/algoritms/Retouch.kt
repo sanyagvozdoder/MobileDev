@@ -3,31 +3,15 @@ package com.example.mobiledev.presentation.algoritms
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.util.Log
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.Rgb
 import com.example.mobiledev.presentation.algoritms.util.generateUri
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.*
-import kotlin.math.roundToInt
-
+import kotlin.math.exp
+import kotlin.math.sqrt
 
 
 fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit,
@@ -47,45 +31,40 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
         val retouchedPixels = IntArray(size)
 
         image.getPixels(originalPixels, 0, width, 0, 0, width, height)
-        image.getPixels(retouchedPixels, 0, width, 0, 0, width, height)
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
+        image.recycle()
 
-                val wsX = x * coefficientX
-                val wsY = y * coefficientY
+        ImageProcessor(
+            originalPixels,
+            width,
+            height
+        ) { x: Int, y: Int, color: Int ->
 
-                val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+            val wsX = x * coefficientX
+            val wsY = y * coefficientY
 
-                if (factor <= 0.01f) continue
-                val centerIndex = y * width + x
+            val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+            val centerIndex = y * width + x
 
-                val neighbors = mutableListOf<Int>()
-                for (dy in -2..2) {
-                    for (dx in -2..2) {
-                        if (dx == 0 && dy == 0) {
-                            continue
-                        }
-                        val neighborX = x + dx
-                        val neighborY = y + dy
-                        if (neighborX in 0 until width && neighborY in 0 until height) {
-                            neighbors.add(originalPixels[neighborY * width + neighborX])
-                        }
-                    }
-                }
+            if (factor >= 0.01f) {
+
+                val neighbors = getNeighbors(x, y, width, height, originalPixels)
 
                 val retouchedColor = calculateRetouchedColor(
-                    originalPixels[centerIndex],
+                    color,
                     neighbors,
                     strength * factor
                 )
                 retouchedPixels[centerIndex] = retouchedColor
+            } else {
+                retouchedPixels[centerIndex] = color
             }
-        }
+        }.process().join()
 
-        onEnd(
-            generateUri(Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888))
-        )
+        val outputBitmap =
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        outputBitmap.setPixels(retouchedPixels, 0, width, 0, 0, width, height)
+        onEnd(generateUri(outputBitmap))
     }
 }
 
@@ -129,4 +108,22 @@ fun calculateRetouchedColor(centerColor: Int, neighbors: List<Int>, strength: Fl
     val newBlue = ((1 - strength) * blue + strength * avgBlue).toInt()
 
     return Color.rgb(newRed, newGreen, newBlue)
+}
+
+fun getNeighbors(x : Int, y : Int, width : Int, height : Int, originalPixels : IntArray) : List<Int>
+{
+    val neighbors = mutableListOf<Int>()
+    for (dy in -2..2) {
+        for (dx in -2..2) {
+            if (dx == 0 && dy == 0) {
+                continue
+            }
+            val neighborX = x + dx
+            val neighborY = y + dy
+            if (neighborX in 0 until width && neighborY in 0 until height) {
+                neighbors.add(originalPixels[neighborY * width + neighborX])
+            }
+        }
+    }
+    return neighbors
 }

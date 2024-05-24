@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -41,8 +41,6 @@ import coil.compose.AsyncImage
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.FaceRecognition
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
-import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
-import com.example.mobiledev.presentation.editorscreen.common.Slider
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -92,7 +90,7 @@ fun CVScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Распознавание лиц", color = Color.White)
+                        Text(text = stringResource(id = R.string.cv), color = Color.White)
                     },
                     navigationIcon = {
                         IconButton(
@@ -155,7 +153,7 @@ fun CVScreen(
                             cvViewModel.onStateUpdate(FaceRecognition(readBytes(context, stateUri), context.resources))
                         }
                     ){
-                        Text(text = "Launch")
+                        Text(text = stringResource(id = R.string.launch))
                     }
                 }
             }
