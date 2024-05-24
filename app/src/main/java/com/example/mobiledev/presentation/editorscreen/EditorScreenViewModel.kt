@@ -2,7 +2,6 @@ package com.example.mobiledev.presentation.editorscreen
 
 
 import android.net.Uri
-import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobiledev.data.settingsitems.SettingsItems
@@ -19,6 +18,7 @@ import com.example.mobiledev.presentation.algoritms.Rotate
 import com.example.mobiledev.presentation.algoritms.Scaling
 import com.example.mobiledev.presentation.algoritms.SeamCarving
 import com.example.mobiledev.presentation.algoritms.UnsharpMask
+import com.example.mobiledev.presentation.algoritms.util.getTmpDirectory
 import com.example.mobiledev.presentation.undoredostates.StateSaver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -84,7 +84,6 @@ class EditorScreenViewModel:ViewModel() {
 }
 
 fun generateNewFile():File{
-    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val file = File.createTempFile("newImage", ".jpg", downloadsDir)
+    val file = File.createTempFile("newImage", ".jpg", getTmpDirectory())
     return file
 }

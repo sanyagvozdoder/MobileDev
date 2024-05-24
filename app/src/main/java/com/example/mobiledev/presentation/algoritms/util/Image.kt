@@ -9,6 +9,24 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
+fun createAppDirectoryIfNotExists() : File{
+    val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/HitsPhotoApp")
+    folder.mkdirs()
+
+    return folder
+}
+
+fun getTmpDirectory() : File{
+    val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/HitsPhotoAppTEMP")
+    folder.mkdirs()
+
+    return folder
+}
+
+fun cleanTmpDirectory() {
+    getTmpDirectory().deleteRecursively()
+}
+
 fun toBitmap(data:ByteArray?):Bitmap {
     var bitmap = BitmapFactory.decodeByteArray(data,0, data?.size?:0)
     return bitmap.copy(Bitmap.Config.ARGB_8888,true)
@@ -29,11 +47,16 @@ fun writeRGBA(pixel:Rgb):Int {
 }
 
 fun generateUri(image:Bitmap): Uri {
-    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val file = File.createTempFile("newImage", ".jpg", downloadsDir)
+    val file = saveToFile(image, "newImage", ".jpg", getTmpDirectory())
+    file.deleteOnExit()
+    return Uri.fromFile(file)
+}
+
+fun saveToFile(image: Bitmap, prefix: String, suffix:String, directory: File) : File {
+    val file = File.createTempFile(prefix, suffix, directory)
     val ostream = FileOutputStream(file)
     ostream.write(toByteArray(image))
     ostream.close()
     image.recycle()
-    return Uri.fromFile(file)
+    return file
 }

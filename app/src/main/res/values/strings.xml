@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileDev</string>
+    <string name="app_name">HitsPhotoApp</string>
     <!--editor screen-->
 
     <string name="rotate">Поворот</string>

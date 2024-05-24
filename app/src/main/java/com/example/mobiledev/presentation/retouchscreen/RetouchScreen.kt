@@ -94,7 +94,7 @@ fun RetouchScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                menuitems.forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed{ index, item->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -157,7 +157,7 @@ fun RetouchScreen(
                     AsyncImage(
                         model = stateUri.currentValue.value,
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize()
                     )
                     Canvas(
