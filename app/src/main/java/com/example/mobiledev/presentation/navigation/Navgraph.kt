@@ -1,4 +1,4 @@
-package com.example.mobiledev.presentation.navigation
+package com.example.mobiledev.presentation.navgraph
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -9,6 +9,7 @@ import com.example.mobiledev.presentation.bilinescreen.BilineScreen
 import com.example.mobiledev.presentation.cubescreen.CubeScreen
 import com.example.mobiledev.presentation.cvscreen.CVScreen
 import com.example.mobiledev.presentation.editorscreen.EditorScreen
+import com.example.mobiledev.presentation.retouchscreen.RetouchScreen
 import com.example.mobiledev.presentation.vectorscreen.VectorScreen
 
 @Composable
@@ -33,6 +34,9 @@ fun NavGraph(){
         }
         composable(route = Route.CubeScreen.route){
             CubeScreen(navController = navController)
+        }
+        composable(route = Route.RetouchScreen.route){
+            RetouchScreen(navController = navController)
         }
     }
 }

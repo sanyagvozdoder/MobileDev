@@ -48,9 +48,9 @@ fun Contrast(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
 
             if (contrast >= 0)
             {
-                pixel.red = ((pixel.red - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
-                pixel.green = ((pixel.green - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
-                pixel.blue = ((pixel.blue - 128) * (1f + contrast / 100f) * (1f + contrast / 100f) + 128).toInt()
+                pixel.red = min(255, max(0,(((pixel.red - 128) * (1f + contrast / 100f) * (1f + contrast / 100f)).toInt() + 128)))
+                pixel.green = min(255, max(0,(((pixel.green - 128) * (1f + contrast / 100f) * (1f + contrast / 100f)).toInt() + 128)))
+                pixel.blue = min(255, max(0,(((pixel.blue - 128) * (1f + contrast / 100f) * (1f + contrast / 100f)).toInt() + 128)))
             }
 
             else
