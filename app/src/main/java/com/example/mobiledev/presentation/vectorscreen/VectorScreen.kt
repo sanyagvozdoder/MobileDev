@@ -1,27 +1,40 @@
 package com.example.mobiledev.presentation.vectorscreen
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,7 +45,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mobiledev.R
@@ -49,11 +68,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun VectorScreen(
     navController: NavController
-){
+) {
     val viewModel = viewModel<VectorScreenViewModel>()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    val dots = remember{
+    val dots = remember {
         mutableStateListOf<SplineDot>()
     }
     var selectedDot by remember {
@@ -64,20 +82,22 @@ fun VectorScreen(
         mutableStateOf(false) // false - dot, true - anchor
     }
 
-    var mode by remember {
-        mutableStateOf(VectorScreenMode.DRAW)
-    }
+    var checkedScreen by remember { mutableStateOf(true) }
+    var checkedSpline by remember { mutableStateOf(false) }
 
-    var splineMode by remember {
-        mutableStateOf(SplineMode.LINE)
-    }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+
+    val screenMode = viewModel.screenModeState.collectAsState()
+    var splineMode = viewModel.splineModeState.collectAsState()
 
     val color = MaterialTheme.colorScheme.onSurface
 
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                viewModel.getMenuItems().forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -120,139 +140,195 @@ fun VectorScreen(
                 )
             },
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(vertical = it.calculateTopPadding() + 15.dp)
                     .fillMaxSize()
-            ) {
-                Canvas(
+                    .padding(it)
+            ){
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .fillMaxHeight(0.75f)
-                        .align(Alignment.CenterHorizontally)
-                        .border(2.dp, MaterialTheme.colorScheme.onSurface)
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onDoubleTap = {
-                                    selectionMode = !selectionMode
-                                },
-                                onLongPress = { offset ->
-                                    if (mode == VectorScreenMode.EDIT) {
-                                        if (selectedDot != -1) {
-                                            if (selectionMode == false)
-                                                dots[selectedDot] =
-                                                    SplineDot(offset, dots[selectedDot].anchor)
-                                            else
-                                                dots[selectedDot] =
-                                                    SplineDot(dots[selectedDot].position, offset)
+                        .fillMaxSize()
+                ) {
+                    Row(modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .height(with(LocalDensity.current) { 10.sp.toDp() * 5 })
+                    ) {
+                        if (screenMode.value == VectorScreenMode.DRAW)
+                            Text(
+                                text = stringResource(id = R.string.dotspawn),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp
+                            )
+                        else
+                            Text(
+                                text = stringResource(R.string.editspline),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp
+                            )
+                    }
+
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .fillMaxHeight(0.9f)
+                            .padding(vertical = 8.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .border(2.dp, MaterialTheme.colorScheme.onSurface)
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onDoubleTap = {
+                                        selectionMode = !selectionMode
+                                    },
+                                    onLongPress = { offset ->
+                                        if (screenMode.value == VectorScreenMode.EDIT) {
+                                            if (selectedDot != -1) {
+                                                if (selectionMode == false)
+                                                    dots[selectedDot] =
+                                                        SplineDot(offset, dots[selectedDot].anchor)
+                                                else
+                                                    dots[selectedDot] =
+                                                        SplineDot(
+                                                            dots[selectedDot].position,
+                                                            offset
+                                                        )
+                                            }
                                         }
+                                    }) { offset ->
+                                    if (screenMode.value == VectorScreenMode.DRAW) {
+                                        if (dots.size > 0) {
+                                            val prevDot = dots[dots.size - 1]
+                                            prevDot.anchor =
+                                                prevDot.position - (prevDot.position - offset) / 2f
+                                        }
+                                        dots.add(SplineDot(offset, offset))
+                                        dots[dots.size - 1].anchor =
+                                            dots[0].position - (dots[0].position - offset) / 2f
+                                    } else {
+                                        selectionMode = false
+                                        OnTap(dots, offset, { i ->
+                                            selectedDot = i
+                                        })
                                     }
-                                }) { offset ->
-                                if (mode == VectorScreenMode.DRAW) {
-                                    if (dots.size > 0) {
-                                        val prevDot = dots[dots.size - 1]
-                                        prevDot.anchor =
-                                            prevDot.position - (prevDot.position - offset) / 2f
-                                    }
-                                    dots.add(SplineDot(offset, offset))
-                                    dots[dots.size - 1].anchor =
-                                        dots[0].position - (dots[0].position - offset) / 2f
-                                } else {
-                                    selectionMode = false
-                                    OnTap(dots, offset, { i ->
-                                        selectedDot = i
-                                    })
                                 }
                             }
-                        }
-                ){
-                    DrawSpline(
-                        dots,
-                        mode,
-                        selectedDot,
-                        selectionMode,
-                        splineMode,
-                        color
-                    )
-                }
-                Row {
-                    if (mode == VectorScreenMode.DRAW)
-                    {
-                        Button(
-                            //modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                mode = VectorScreenMode.EDIT
-                            }
-                        ) {
-                            Text(text = "Установка точек")
-                        }
+                    ) {
+                        DrawSpline(
+                            dots,
+                            screenMode.value,
+                            selectedDot,
+                            selectionMode,
+                            splineMode.value,
+                            color
+                        )
                     }
-                    else
-                    {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 5.dp, horizontal = 10.dp)
+                    ) {
+                        Switch(
+                            checked = checkedScreen,
+                            onCheckedChange = {
+                                if (it == true) {
+                                    viewModel.onScreenModeUpdate(VectorScreenMode.DRAW)
+                                } else {
+                                    viewModel.onScreenModeUpdate(VectorScreenMode.EDIT)
+                                }
+                                checkedScreen = it
+                            },
+                            thumbContent = if (checkedScreen) {
+                                {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_dot),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_edit),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            }
+                        )
+                        Button(onClick = {
+                            showBottomSheet = true
+                        }) {
+                            Text(text = "Меню удаления")
+                        }
+                        Switch(
+                            checked = checkedSpline,
+                            onCheckedChange = {
+                                if (it == true) {
+                                    viewModel.onSplineModeUpdate(SplineMode.SHAPE)
+                                } else {
+                                    viewModel.onSplineModeUpdate(SplineMode.LINE)
+                                }
+                                checkedSpline = it
+                            },
+                            thumbContent = if (checkedSpline) {
+                                {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_shape),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_line),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+            if (showBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        showBottomSheet = false
+                    },
+                    sheetState = sheetState
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
                         Button(
-                            //modifier = Modifier.fillMaxWidth(),
                             onClick = {
-                                mode = VectorScreenMode.DRAW
+                                dots.clear()
+                                viewModel.onScreenModeUpdate(VectorScreenMode.DRAW)
                                 selectedDot = -1
                                 selectionMode = false
-                            }
+                            },
+                            modifier = Modifier.padding(vertical = 10.dp)
                         ) {
-                            Text(text = "Редактирование")
+                            Text(text = "Очистить всё")
                         }
-                    }
-                    if (splineMode == SplineMode.LINE)
-                    {
-                        Button(
-                            //modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                splineMode = SplineMode.SHAPE
+                        if (selectedDot != -1) {
+                            Button(
+                                onClick = {
+                                    dots.removeAt(selectedDot)
+                                    selectedDot = -1
+                                    selectionMode = false
+                                },
+                                modifier = Modifier.padding(vertical = 10.dp)
+                            ) {
+                                Text(text = "Удалить точку")
                             }
-                        ) {
-                            Text(text = "Линия")
                         }
                     }
-                    else
-                    {
-                        Button(
-                            //modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                splineMode = SplineMode.LINE
-                            }
-                        ) {
-                            Text(text = "Фигура")
-                        }
-                    }
-                }
-                Row {
-                    Button(
-                        onClick = {
-                            dots.clear()
-                            mode = VectorScreenMode.DRAW
-                            selectedDot = -1
-                            selectionMode = false
-                        }
-                    ){
-                        Text(text = "Очистить всё")
-                    }
-                    if(selectedDot != -1)
-                    {
-                        Button(
-                            onClick = {
-                                dots.removeAt(selectedDot)
-                                selectedDot = -1
-                                selectionMode = false
-                            }
-                        ){
-                            Text(text = "Удалить точку")
-                        }
-                    }
-                }
-                Row {
-                    if(mode == VectorScreenMode.DRAW)
-                        Text(text = "Нажмите, чтобы разместить точку.")
-                    else
-                        Text(text = "Нажмите, чтобы выделить, удерживайте, чтобы переместить. " +
-                                "Двойное нажатие - переключение якорь/точка.")
                 }
             }
         }

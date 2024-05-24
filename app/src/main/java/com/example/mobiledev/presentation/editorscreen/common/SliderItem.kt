@@ -1,5 +1,6 @@
 package com.example.mobiledev.presentation.editorscreen.common
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
+import com.example.mobiledev.presentation.editorscreen.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,12 +39,14 @@ fun LazyItemScope.SliderItem(
     icon:Int,
     text:Int,
     vmInst: EditorScreenViewModel,
-    index:Int
+    index:Int,
+    context: Context
 ){
+    val stateUri by vmInst.stateUriFlow.collectAsState()
+
     Column(
         modifier = Modifier
             .padding(horizontal = 5.dp)
-
     ) {
         Box(
             modifier = Modifier
@@ -48,8 +54,17 @@ fun LazyItemScope.SliderItem(
                 .align(Alignment.CenterHorizontally)
                 .size(IconSize * 3)
                 .clickable(onClick = {
-                    vmInst.onSliderStateUpdate(false)
-                    vmInst.onSettingsStateUpdate(index)
+                    if (vmInst.getSettingsItems()[index].numOfSliders == 0) {
+                        val lambda: (Uri?) -> Unit = { uri ->
+                            vmInst.onStateUpdate(uri)
+                        }
+                        val byteArray = readBytes(context, stateUri.currentValue.value)
+
+                        vmInst.getFunctionsList()[index].invoke(byteArray, lambda, listOf())
+                    } else {
+                        vmInst.onSliderStateUpdate(false)
+                        vmInst.onSettingsStateUpdate(index)
+                    }
                 })
         ){
             Icon(

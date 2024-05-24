@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileDev</string>
+    <string name="app_name">HitsPhotoApp</string>
     <string name="rotate">Поворот</string>
     <string name="filters"> Фильтры</string>
     <string name="scale">Масштабирование</string>
@@ -9,4 +9,9 @@
     <string name="mask">Маскирование</string>
     <string name="biline"> Билинейная и трилинейная фильтрация</string>
     <string name="cube">3D кубик</string>
+    <string name="dotspawn">Нажмите, чтобы разместить точку.</string>
+    <string name="editspline">
+        Нажмите, чтобы выделить, удерживайте, чтобы переместить.
+        \nДвойное нажатие - переключение якорь/точка.
+    </string>
 </resources>

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +16,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +25,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -55,7 +64,11 @@ import androidx.compose.runtime.Composable as Composable
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.core.content.FileProvider
+import com.example.mobiledev.presentation.algoritms.util.createAppDirectoryIfNotExists
+import com.example.mobiledev.presentation.algoritms.util.saveToFile
+import com.example.mobiledev.presentation.algoritms.util.toBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +84,14 @@ fun EditorScreen(
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {uri-> editViewModel.onStateUpdate(uri)}
+        onResult = {uri->
+            if(uri!=null){
+                editViewModel.onStateUpdate(uri)
+                if(stateUri.currentValue.value != null){
+                    editViewModel.onSliderStateUpdate(true)
+                }
+            }
+        }
     )
 
     var uriForCapturing:Uri = FileProvider.getUriForFile(
@@ -85,6 +105,9 @@ fun EditorScreen(
         onResult = {success->
             if(success){
                 editViewModel.onStateUpdate(uriForCapturing)
+                if(stateUri.currentValue.value != null){
+                    editViewModel.onSliderStateUpdate(true)
+                }
             }
         }
     )
@@ -176,11 +199,11 @@ fun EditorScreen(
                     AsyncImage(
                         model = stateUri.currentValue.value,
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(400.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(20.dp))
                     )
 
                     AnimatedVisibility(
@@ -195,7 +218,8 @@ fun EditorScreen(
                                 .padding(8.dp)
                                 .animateContentSize(),
                             items = editViewModel.getSliderElements(),
-                            vmInst = editViewModel
+                            vmInst = editViewModel,
+                            context = context
                         )
                     }
 
@@ -216,7 +240,8 @@ fun EditorScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
                             modifier = Modifier
@@ -226,14 +251,15 @@ fun EditorScreen(
                                 pickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
-                                editViewModel.onSliderStateUpdate(true)
                             },
                             isEnabled = true
                         )
-                        IconButton(
+                        Button(
                             modifier = Modifier
-                                .padding(horizontal = 8.dp),
-                            icon = R.drawable.ic_camera,
+                                .padding(horizontal = 8.dp)
+                                .border(5.dp, Color.Black, CircleShape)
+                                .size(AssistChipDefaults.IconSize * 4)
+                                .clip(RoundedCornerShape(1f)),
                             onClick = {
                                 uriForCapturing = FileProvider.getUriForFile(
                                     context,
@@ -241,9 +267,22 @@ fun EditorScreen(
                                     generateNewFile()
                                 )
                                 cameraLauncher.launch(uriForCapturing)
-                                editViewModel.onSliderStateUpdate(true)
                             },
-                            isEnabled = true
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, Color.Black)
+                        ){
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_camera),
+                                contentDescription = null,
+                                modifier = Modifier.size(AssistChipDefaults.IconSize * 2).align(Alignment.CenterVertically)
+                            )
+                        }
+                        IconButton(
+                            icon = R.drawable.ic_save,
+                            onClick = {
+                                val directory = createAppDirectoryIfNotExists()
+                                Toast.makeText(context,"Файл сохранен в директорию " + directory.toString(), Toast.LENGTH_LONG).show()
+                                saveToFile(toBitmap(readBytes(context,stateUri.currentValue.value)), "IMG", ".jpg", directory)
+                            }
                         )
                     }
                 }

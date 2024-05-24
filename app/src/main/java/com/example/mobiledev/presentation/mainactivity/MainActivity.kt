@@ -24,6 +24,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onDestroy(){
+        //here
+        super.onDestroy()
+    }
 }
 
 @Preview

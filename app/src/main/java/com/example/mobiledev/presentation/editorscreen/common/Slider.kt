@@ -1,5 +1,6 @@
 package com.example.mobiledev.presentation.editorscreen.common
 
+import android.content.Context
 import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -14,7 +15,8 @@ import kotlinx.coroutines.CoroutineScope
 fun Slider(
     items:List<SliderElement>,
     modifier: Modifier = Modifier,
-    vmInst: EditorScreenViewModel
+    vmInst: EditorScreenViewModel,
+    context: Context
 ){
     LazyRow(
         modifier = modifier
@@ -25,7 +27,8 @@ fun Slider(
                     icon = items[index].icon,
                     text = items[index].text,
                     vmInst = vmInst,
-                    index = index
+                    index = index,
+                    context = context
                 )
             }
         }
