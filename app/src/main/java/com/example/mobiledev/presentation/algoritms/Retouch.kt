@@ -47,45 +47,41 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
         val retouchedPixels = IntArray(size)
 
         image.getPixels(originalPixels, 0, width, 0, 0, width, height)
-        image.getPixels(retouchedPixels, 0, width, 0, 0, width, height)
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
+        val processPixel = { x: Int, y: Int, color: Int ->
 
-                val wsX = x * coefficientX
-                val wsY = y * coefficientY
+            val wsX = x * coefficientX
+            val wsY = y * coefficientY
 
-                val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+            val factor = getMaskFactor(points, radius, Offset(wsX, wsY))
+            val centerIndex = y * width + x
 
-                if (factor <= 0.01f) continue
-                val centerIndex = y * width + x
+            if (factor >= 0.01f) {
 
-                val neighbors = mutableListOf<Int>()
-                for (dy in -2..2) {
-                    for (dx in -2..2) {
-                        if (dx == 0 && dy == 0) {
-                            continue
-                        }
-                        val neighborX = x + dx
-                        val neighborY = y + dy
-                        if (neighborX in 0 until width && neighborY in 0 until height) {
-                            neighbors.add(originalPixels[neighborY * width + neighborX])
-                        }
-                    }
-                }
+                val neighbors = getNeighbors(x, y, width, height, originalPixels)
 
-                val retouchedColor = calculateRetouchedColor(
-                    originalPixels[centerIndex],
-                    neighbors,
-                    strength * factor
-                )
+                val retouchedColor = calculateRetouchedColor(originalPixels[centerIndex],
+                neighbors,
+                strength * factor)
                 retouchedPixels[centerIndex] = retouchedColor
+            }
+            else
+            {
+                retouchedPixels[centerIndex] = originalPixels[centerIndex]
             }
         }
 
-        onEnd(
-            generateUri(Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888))
-        )
+        val makeNewBitmap = {
+            image.recycle()
+
+            val outputBitmap =
+                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            outputBitmap.setPixels(retouchedPixels, 0, width, 0, 0, width, height)
+            onEnd(generateUri(outputBitmap))
+        }
+
+        val processor = ImageProcessor(image, processPixel)
+        processor.process(makeNewBitmap).join()
     }
 }
 
@@ -129,4 +125,22 @@ fun calculateRetouchedColor(centerColor: Int, neighbors: List<Int>, strength: Fl
     val newBlue = ((1 - strength) * blue + strength * avgBlue).toInt()
 
     return Color.rgb(newRed, newGreen, newBlue)
+}
+
+fun getNeighbors(x : Int, y : Int, width : Int, height : Int, originalPixels : IntArray) : List<Int>
+{
+    val neighbors = mutableListOf<Int>()
+    for (dy in -2..2) {
+        for (dx in -2..2) {
+            if (dx == 0 && dy == 0) {
+                continue
+            }
+            val neighborX = x + dx
+            val neighborY = y + dy
+            if (neighborX in 0 until width && neighborY in 0 until height) {
+                neighbors.add(originalPixels[neighborY * width + neighborX])
+            }
+        }
+    }
+    return neighbors
 }
