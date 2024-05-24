@@ -30,16 +30,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -71,6 +75,9 @@ fun AfineScreen(
     val dotsEnd = remember{
         mutableStateListOf<Offset>()
     }
+
+    var workSpaceSizeStart by remember { mutableStateOf(IntSize.Zero) }
+    var workSpaceSizeEnd by remember { mutableStateOf(IntSize.Zero) }
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -153,7 +160,11 @@ fun AfineScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                     Canvas(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onGloballyPositioned { coordinates ->
+                                workSpaceSizeStart = coordinates.size
+                            }
                     ){
                         dotsStart.forEachIndexed{index, offset->
                             drawCircle(
@@ -187,6 +198,9 @@ fun AfineScreen(
                     )
                     Canvas(
                         modifier = Modifier.fillMaxSize()
+                            .onGloballyPositioned { coordinates ->
+                                workSpaceSizeEnd = coordinates.size
+                            }
                     ){
                         dotsEnd.forEachIndexed{index,offset->
                             drawCircle(
@@ -214,7 +228,7 @@ fun AfineScreen(
                     
                     Button(onClick = {
                         ApplyAffineTransform(readBytes(context, viewModel.startUriFlow.value),
-                            dotsStart, dotsEnd){
+                            dotsStart, dotsEnd, workSpaceSizeStart, workSpaceSizeEnd){
                             viewModel.onEndUpdate(it)
                         }
                     }) {
