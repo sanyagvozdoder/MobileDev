@@ -1,5 +1,6 @@
 package com.example.mobiledev.presentation.editorscreen
 
+
 import android.net.Uri
 import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,6 +27,7 @@ import com.example.mobiledev.presentation.algoritms.Contrast
 import com.example.mobiledev.presentation.algoritms.Grayscale
 import com.example.mobiledev.presentation.algoritms.Negative
 import com.example.mobiledev.presentation.algoritms.Rotate
+import com.example.mobiledev.presentation.algoritms.Blur
 import com.example.mobiledev.presentation.algoritms.Scaling
 import com.example.mobiledev.presentation.algoritms.SeamCarving
 import com.example.mobiledev.presentation.algoritms.UnsharpMask
@@ -89,7 +91,7 @@ class EditorScreenViewModel:ViewModel() {
             ::Contrast,
             ::Grayscale,
             ::Negative,
-            ::Scaling,
+            ::Blur,
             ::UnsharpMask,
             ::SeamCarving
         )
