@@ -2,12 +2,16 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.algoritms.util.updateScreen
@@ -28,7 +32,8 @@ import kotlin.math.roundToInt
 
 
 fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit,
-                 points:List<Offset>, radius:Int, workSpaceSize: IntSize) {
+                 points:List<Offset>, radius:Int, workSpaceSize: IntSize
+) {
     GlobalScope.launch {
         val image = toBitmap(img);
         val strength = strengthPercentage / 100f // 0..1
