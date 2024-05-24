@@ -1,23 +1,14 @@
 package com.example.mobiledev.presentation.vectorscreen
 
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,23 +25,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.DrawSpline
 import com.example.mobiledev.presentation.algoritms.OnTap
@@ -58,13 +42,6 @@ import com.example.mobiledev.presentation.algoritms.util.SplineDot
 import com.example.mobiledev.presentation.algoritms.util.SplineMode
 import com.example.mobiledev.presentation.algoritms.util.VectorScreenMode
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
-import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
-import com.example.mobiledev.presentation.editorscreen.common.Slider
-import com.example.mobiledev.presentation.editorscreen.functionsAlghoritms
-import com.example.mobiledev.presentation.editorscreen.menuitems
-import com.example.mobiledev.presentation.editorscreen.settings
-import com.example.mobiledev.presentation.editorscreen.sliderElelements
-import com.example.mobiledev.presentation.navgraph.Route
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 
@@ -73,6 +50,7 @@ import kotlinx.coroutines.launch
 fun VectorScreen(
     navController: NavController
 ){
+    val viewModel = viewModel<VectorScreenViewModel>()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val dots = remember{
@@ -94,10 +72,12 @@ fun VectorScreen(
         mutableStateOf(SplineMode.LINE)
     }
 
+    val color = MaterialTheme.colorScheme.onSurface
+
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                menuitems.forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed{ index, item->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -150,7 +130,7 @@ fun VectorScreen(
                         .fillMaxWidth(0.9f)
                         .fillMaxHeight(0.75f)
                         .align(Alignment.CenterHorizontally)
-                        .border(2.dp, Color.Black)
+                        .border(2.dp, MaterialTheme.colorScheme.onSurface)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onDoubleTap = {
@@ -175,7 +155,8 @@ fun VectorScreen(
                                             prevDot.position - (prevDot.position - offset) / 2f
                                     }
                                     dots.add(SplineDot(offset, offset))
-                                    dots[dots.size - 1].anchor = dots[0].position - (dots[0].position - offset) / 2f
+                                    dots[dots.size - 1].anchor =
+                                        dots[0].position - (dots[0].position - offset) / 2f
                                 } else {
                                     selectionMode = false
                                     OnTap(dots, offset, { i ->
@@ -185,7 +166,14 @@ fun VectorScreen(
                             }
                         }
                 ){
-                    DrawSpline(dots, mode, selectedDot, selectionMode, splineMode)
+                    DrawSpline(
+                        dots,
+                        mode,
+                        selectedDot,
+                        selectionMode,
+                        splineMode,
+                        color
+                    )
                 }
                 Row {
                     if (mode == VectorScreenMode.DRAW)

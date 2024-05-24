@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Environment
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import com.example.mobiledev.presentation.retouchscreen.RetouchScreenViewModel
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -34,9 +33,9 @@ fun writeRGBA(pixel:Rgb):Int {
     return Color.argb(pixel.alpha, pixel.red, pixel.green, pixel.blue)
 }
 
-fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
+/*fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
     viewModelInstance.onStateUpdate(generateUri(image))
-}
+}*/
 
 fun updateScreen(image:Bitmap, viewModelInstance: RetouchScreenViewModel){
     viewModelInstance.onStateUpdate(generateUri(image))
@@ -82,8 +81,7 @@ fun transpose(bitmap: Bitmap, right: Boolean = false) =
 
         }
 
-        val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_ROTATE")
-        val processor = ImageProcessor(config = config)
+        val processor = ImageProcessor(bitmap, processPixel)
         processor.process(makeNewBitmap).join()
         outputBitmap
 }

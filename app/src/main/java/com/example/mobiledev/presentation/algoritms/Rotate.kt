@@ -2,13 +2,13 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Size
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.algoritms.util.transpose
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
 import com.example.mobiledev.presentation.algoritms.util.writeRGBA
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.GlobalScope
@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @OptIn(ExperimentalEncodingApi::class)
-fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
+fun Rotate(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
         var pixels = IntArray(bitmap.width * bitmap.height)
@@ -41,7 +41,7 @@ fun Rotate(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<I
 
         val outputBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
         outputBitmap.setPixels(pixels, 0, newWidth, 0, 0, newWidth, newHeight)
-        updateScreen(outputBitmap, viewModelInstance)
+        onEnd(generateUri(outputBitmap))
     }
 }
 

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AssistChipDefaults.IconSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,7 +44,7 @@ fun LazyItemScope.SliderItem(
     ) {
         Box(
             modifier = Modifier
-                .border(1.dp, Color.Black, CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
                 .align(Alignment.CenterHorizontally)
                 .size(IconSize * 3)
                 .clickable(onClick = {

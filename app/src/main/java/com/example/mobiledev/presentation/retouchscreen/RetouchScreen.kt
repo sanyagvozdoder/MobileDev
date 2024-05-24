@@ -47,10 +47,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
-import com.example.mobiledev.presentation.algoritms.MotionEvent
+import com.example.mobiledev.data.sidebarmenu.menuitems
 import com.example.mobiledev.presentation.algoritms.applyRetouch
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
-import com.example.mobiledev.presentation.editorscreen.menuitems
 import com.example.mobiledev.presentation.editorscreen.readBytes
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch

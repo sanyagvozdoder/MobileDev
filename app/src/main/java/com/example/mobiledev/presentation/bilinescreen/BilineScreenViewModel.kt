@@ -3,6 +3,8 @@ package com.example.mobiledev.presentation.bilinescreen
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mobiledev.data.sidebarmenu.SideBarElement
+import com.example.mobiledev.data.sidebarmenu.menuitems
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -28,5 +30,9 @@ class BilineScreenViewModel:ViewModel() {
         viewModelScope.launch{
             _endUriFlow.emit(newImage)
         }
+    }
+
+    fun getMenuItems():List<SideBarElement>{
+        return menuitems
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.mobiledev.data.route.Route
 import com.example.mobiledev.presentation.bilinescreen.BilineScreen
 import com.example.mobiledev.presentation.cubescreen.CubeScreen
 import com.example.mobiledev.presentation.cvscreen.CVScreen

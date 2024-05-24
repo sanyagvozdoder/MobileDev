@@ -16,6 +16,19 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.ActivityNavigatorExtras
+import com.example.mobiledev.data.settingsitems.SettingsItems
+import com.example.mobiledev.data.settingsitems.settingsItemsList
+import com.example.mobiledev.data.sidebarmenu.SideBarElement
+import com.example.mobiledev.data.sidebarmenu.menuitems
+import com.example.mobiledev.data.sliderelements.SliderElement
+import com.example.mobiledev.data.sliderelements.sliderElelements
+import com.example.mobiledev.presentation.algoritms.Contrast
+import com.example.mobiledev.presentation.algoritms.Grayscale
+import com.example.mobiledev.presentation.algoritms.Negative
+import com.example.mobiledev.presentation.algoritms.Rotate
+import com.example.mobiledev.presentation.algoritms.Scaling
+import com.example.mobiledev.presentation.algoritms.SeamCarving
+import com.example.mobiledev.presentation.algoritms.UnsharpMask
 import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.undoredostates.StateSaver
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +68,31 @@ class EditorScreenViewModel:ViewModel() {
         viewModelScope.launch{
             _settingsState.emit(state)
         }
+    }
+
+    fun getMenuItems():List<SideBarElement>{
+        return menuitems
+    }
+
+    fun getSliderElements():List<SliderElement>{
+        return sliderElelements
+    }
+
+    fun getSettingsItems():List<SettingsItems>{
+        return settingsItemsList
+    }
+
+    fun getFunctionsList() : List<(ByteArray?, (Uri?)->Unit, List<Int>) -> Unit>{
+        return listOf<(ByteArray?, (Uri?)->Unit, List<Int>) -> Unit>(
+            ::Rotate,
+            ::Scaling,
+            ::Contrast,
+            ::Grayscale,
+            ::Negative,
+            ::Scaling,
+            ::UnsharpMask,
+            ::SeamCarving
+        )
     }
 }
 

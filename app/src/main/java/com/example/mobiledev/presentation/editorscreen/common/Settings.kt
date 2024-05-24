@@ -1,5 +1,6 @@
 package com.example.mobiledev.presentation.editorscreen.common
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,13 +29,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.mobiledev.R
+import com.example.mobiledev.data.settingsitems.SettingsItems
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 
 @Composable
 fun SettingsTools(
     modifier: Modifier = Modifier,
-    sliders:SettingsItems?,
-    onAcceptClick:(ByteArray?, EditorScreenViewModel, List<Int>)->Unit,
+    sliders: SettingsItems?,
+    onAcceptClick:(ByteArray?, (Uri?)->Unit, List<Int>)->Unit,
     editorScreenViewModel: EditorScreenViewModel,
     byteArray: ByteArray?
 ){
@@ -81,7 +83,10 @@ fun SettingsTools(
                     (0..((sliders?.numOfSliders ?: 0) - 1)).forEach{index->
                         params.add(sliderPositions[index].toInt())
                     }
-                    onAcceptClick(byteArray,editorScreenViewModel,params)
+                    val lambda:(Uri?)->Unit = {uri->
+                        editorScreenViewModel.onStateUpdate(uri)
+                    }
+                    onAcceptClick(byteArray,lambda,params)
                 }
             ) {
                 Icon(

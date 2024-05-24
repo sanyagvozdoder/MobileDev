@@ -1,5 +1,6 @@
 package com.example.mobiledev.presentation.algoritms
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -61,8 +62,14 @@ fun bezierPoint(t: Float, points: List<Offset>): Offset{
     return point
 }
 
-fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
-                         selectedIndex:Int, selectionMode:Boolean, splineMode: SplineMode){
+fun DrawScope.DrawSpline(
+    dots:List<SplineDot>,
+    screenMode: VectorScreenMode,
+    selectedIndex:Int,
+    selectionMode:Boolean,
+    splineMode: SplineMode,
+    mainColor:Color
+){
     //spline
     dots.forEachIndexed{index,dot->
         if (dots.size >= 2 && (splineMode == SplineMode.LINE && index != 0 ||
@@ -83,7 +90,7 @@ fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
             while (t <= 1f + step) {
                 val p = bezierPoint(t, points)
                 drawLine(
-                    color = Color.Black,
+                    color = mainColor,
                     start = lastPoint,
                     end = p,
                     strokeWidth = 10f,
@@ -97,7 +104,7 @@ fun DrawScope.DrawSpline(dots:List<SplineDot>, screenMode: VectorScreenMode,
 
     // dots
     dots.forEachIndexed{index,dot->
-        var pointColor = Color.Black
+        var pointColor = mainColor
         var pointRadius = 10f
 
         if(index == selectedIndex)

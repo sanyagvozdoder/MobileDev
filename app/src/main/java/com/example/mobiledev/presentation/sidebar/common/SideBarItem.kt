@@ -35,10 +35,3 @@ fun SideBarItem(
         Text(text = stringResource(id = text), fontSize = 15.sp )
     }
 }
-
-data class sideBarElement(
-    val id:Int,
-    @DrawableRes val icon:Int,
-    @StringRes val text:Int,
-    val route:String
-)

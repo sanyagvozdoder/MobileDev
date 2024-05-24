@@ -43,10 +43,6 @@ import com.example.mobiledev.presentation.algoritms.FaceRecognition
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
-import com.example.mobiledev.presentation.editorscreen.functionsAlghoritms
-import com.example.mobiledev.presentation.editorscreen.menuitems
-import com.example.mobiledev.presentation.editorscreen.settings
-import com.example.mobiledev.presentation.editorscreen.sliderElelements
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -71,7 +67,7 @@ fun CVScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                menuitems.forEachIndexed{ index, item->
+                cvViewModel.getMenuItems().forEachIndexed{ index, item->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(

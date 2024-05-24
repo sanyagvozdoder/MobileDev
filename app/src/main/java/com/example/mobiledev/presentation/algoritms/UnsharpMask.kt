@@ -2,15 +2,15 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
 import com.example.mobiledev.presentation.algoritms.util.writeRGBA
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +32,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalEncodingApi::class)
 
 
-fun UnsharpMask(img:ByteArray?, viewModelInstance:EditorScreenViewModel, args:List<Int>)  {
+fun UnsharpMask(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>)  {
 
     val threshold = args[0];
     val radius = args[1];
@@ -66,9 +66,7 @@ fun UnsharpMask(img:ByteArray?, viewModelInstance:EditorScreenViewModel, args:Li
         }
     }
 
-
-    updateScreen(Bitmap.createBitmap(resultPixels, width, height, Bitmap.Config.ARGB_8888), viewModelInstance)
-
+    onEnd(generateUri(Bitmap.createBitmap(resultPixels, width, height, Bitmap.Config.ARGB_8888)))
 }
 
 fun gaussianBlur(pixels: IntArray, width: Int, height: Int, radius: Int): IntArray {

@@ -6,12 +6,13 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.mobiledev.data.sliderelements.SliderElement
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun Slider(
-    items:List<sliderElement>,
+    items:List<SliderElement>,
     modifier: Modifier = Modifier,
     vmInst: EditorScreenViewModel
 ){
@@ -30,11 +31,4 @@ fun Slider(
         }
     }
 }
-
-
-data class sliderElement(
-    val index:Int,
-    @DrawableRes val icon:Int,
-    @StringRes val text:Int
-)
 
