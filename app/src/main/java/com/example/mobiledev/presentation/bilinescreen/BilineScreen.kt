@@ -3,7 +3,6 @@ package com.example.mobiledev.presentation.bilinescreen
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -43,15 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
-import com.example.mobiledev.presentation.algoritms.util.SplineDot
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
-import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
-import com.example.mobiledev.presentation.editorscreen.common.Slider
-import com.example.mobiledev.presentation.editorscreen.functionsAlghoritms
-import com.example.mobiledev.presentation.editorscreen.menuitems
-import com.example.mobiledev.presentation.editorscreen.settings
-import com.example.mobiledev.presentation.editorscreen.sliderElelements
-import com.example.mobiledev.presentation.navgraph.Route
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 
@@ -87,7 +78,7 @@ fun BilineScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                menuitems.forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed{ index, item->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -141,9 +132,9 @@ fun BilineScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.9f)
                         .align(Alignment.CenterHorizontally)
-                        .pointerInput(Unit){
+                        .pointerInput(Unit) {
                             detectTapGestures {
-                                if(dotsStart.size <= 2){
+                                if (dotsStart.size <= 2) {
                                     dotsStart.add(it)
                                 }
                             }
@@ -174,9 +165,9 @@ fun BilineScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.9f)
                         .align(Alignment.CenterHorizontally)
-                        .pointerInput(Unit){
+                        .pointerInput(Unit) {
                             detectTapGestures {
-                                if(dotsEnd.size <= 2){
+                                if (dotsEnd.size <= 2) {
                                     dotsEnd.add(it)
                                 }
                             }
@@ -202,7 +193,9 @@ fun BilineScreen(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
-                    modifier = Modifier.weight(0.3f).fillMaxSize()
+                    modifier = Modifier
+                        .weight(0.3f)
+                        .fillMaxSize()
                 ) {
                     IconButton(
                         icon = R.drawable.ic_pic,

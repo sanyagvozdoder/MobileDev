@@ -1,4 +1,4 @@
-package com.example.mobiledev.presentation.editorscreen.common
+package com.example.mobiledev.data.settingsitems
 
 data class SettingsItems(
     val numOfSliders:Int,

@@ -8,16 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.mobiledev.presentation.navgraph.NavGraph
+import com.example.mobiledev.presentation.navigation.NavGraph
+import com.example.mobiledev.ui.theme.MobileDevTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ){
-                NavGraph()
+            MobileDevTheme {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ){
+                    NavGraph()
+                }
             }
         }
     }

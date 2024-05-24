@@ -2,10 +2,11 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.algoritms.util.transpose
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.GlobalScope
@@ -18,7 +19,7 @@ import kotlin.math.min
 // https://www.youtube.com/watch?v=6NcIJXTlugc
 // https://en.wikipedia.org/wiki/Seam_carving
 @OptIn(ExperimentalEncodingApi::class)
-fun SeamCarving(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>){
+fun SeamCarving(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>){
     GlobalScope.launch {
         val bitmap = toBitmap(img)
         var pixels = IntArray(bitmap.width * bitmap.height)
@@ -50,7 +51,7 @@ fun SeamCarving(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:L
 
         val outputBitmap = Bitmap.createBitmap(cWidth, cHeight, Bitmap.Config.ARGB_8888)
         outputBitmap.setPixels(pixels, 0, cWidth, 0, 0, cWidth, cHeight)
-        updateScreen(outputBitmap, viewModelInstance)
+        onEnd(generateUri(outputBitmap))
     }
 }
 

@@ -34,9 +34,9 @@ fun writeRGBA(pixel:Rgb):Int {
     return Color.argb(pixel.alpha, pixel.red, pixel.green, pixel.blue)
 }
 
-fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
+/*fun updateScreen(image:Bitmap, viewModelInstance: EditorScreenViewModel){
     viewModelInstance.onStateUpdate(generateUri(image))
-}
+}*/
 
 fun generateUri(image:Bitmap): Uri {
     val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

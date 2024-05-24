@@ -2,15 +2,16 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
 import com.example.mobiledev.presentation.algoritms.util.writeRGBA
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.CoroutineStart
@@ -29,7 +30,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalEncodingApi::class)
 
-fun Retouch(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
+fun Retouch(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
 
     val image = toBitmap(img);
     val strength : Float = args[0].toFloat() / 100
@@ -64,7 +65,7 @@ fun Retouch(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<
         }
     }
 
-    updateScreen(Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888), viewModelInstance)
+    onEnd(generateUri(Bitmap.createBitmap(retouchedPixels, width, height, Bitmap.Config.ARGB_8888)))
 }
 
 

@@ -1,11 +1,10 @@
-package com.example.mobiledev.presentation.navgraph
+package com.example.mobiledev.presentation.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.example.mobiledev.data.route.Route
 import com.example.mobiledev.presentation.bilinescreen.BilineScreen
 import com.example.mobiledev.presentation.cubescreen.CubeScreen
 import com.example.mobiledev.presentation.cvscreen.CVScreen

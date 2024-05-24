@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.util.Camera
@@ -37,7 +38,6 @@ import com.example.mobiledev.presentation.algoritms.util.moveZ
 import com.example.mobiledev.presentation.algoritms.util.project
 import com.example.mobiledev.presentation.algoritms.util.rotateXYZ
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
-import com.example.mobiledev.presentation.editorscreen.menuitems
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 
@@ -49,6 +49,8 @@ fun CubeScreen(
 ){
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val viewModel = viewModel<CubeScreenViewModel>()
 
     val angleX = remember {
         mutableStateOf(0)
@@ -65,7 +67,7 @@ fun CubeScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                menuitems.forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed{ index, item->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(

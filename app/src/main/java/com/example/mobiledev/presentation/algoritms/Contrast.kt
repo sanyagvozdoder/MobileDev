@@ -2,15 +2,16 @@ package com.example.mobiledev.presentation.algoritms
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessorConfig
 import com.example.mobiledev.presentation.algoritms.util.Rgb
+import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
 import com.example.mobiledev.presentation.algoritms.util.writeRGBA
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import kotlinx.coroutines.CoroutineStart
@@ -28,7 +29,7 @@ import kotlin.math.roundToInt
 
 // https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
-fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List<Int>) {
+fun Contrast(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 
@@ -62,13 +63,13 @@ fun Contrast(img:ByteArray?, viewModelInstance: EditorScreenViewModel, args:List
             outputPixels[i] = writeRGBA(pixel)
         }
 
-        val makeNewBitmap = {
+        val makeNewBitmap:()->Unit = {
             bitmap.recycle()
 
             val outputBitmap =
                 Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
             outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
-            updateScreen(outputBitmap, viewModelInstance)
+            onEnd(generateUri(outputBitmap))
         }
 
         val config = ImageProcessorConfig(bitmap, processPixel, 200, "ALGO_CONTRAST")

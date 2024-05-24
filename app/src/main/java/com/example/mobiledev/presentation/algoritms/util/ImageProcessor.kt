@@ -1,6 +1,7 @@
 package com.example.mobiledev.presentation.algoritms.util
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -47,7 +48,7 @@ class ImageProcessor(private val config: ImageProcessorConfig) {
         processedChunks++
     }
 
-    suspend fun process(onEnd:() -> Unit) = GlobalScope.launch(start = CoroutineStart.LAZY) {
+    suspend fun process(onEnd:()-> Unit) = GlobalScope.launch(start = CoroutineStart.LAZY) {
         config.input.getPixels(inPixels, 0, config.input.width, 0, 0,
             config.input.width, config.input.height)
         val jobs = mutableListOf<Job>()
