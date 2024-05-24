@@ -3,14 +3,10 @@ package com.example.mobiledev.presentation.algoritms
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.util.Log
+import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.transpose
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.min
@@ -55,18 +51,27 @@ fun SeamCarving(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>){
     }
 }
 
-fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
+suspend fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
     val outputPixels = IntArray((width - 1) * height)
     val energy = IntArray(width * height)
     val cumulativeEnergy = IntArray(width * height)
     val seamPath = IntArray(height)
 
-    repeat(height) { y ->
+    ImageProcessor(
+        pixels,
+        width,
+        height
+    ) { x, y, c ->
+        val i = y * width + x
+        energy[i] = computeEnergy(pixels, width, height, x, y)
+    }.process().join()
+
+    /*repeat(height) { y ->
         repeat(width) { x ->
             val i = y * width + x
             energy[i] = computeEnergy(pixels, width, height, x, y)
         }
-    }
+    }*/
 
     repeat(width) { x ->
         cumulativeEnergy[x] = energy[x]
@@ -78,6 +83,17 @@ fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
             cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width,y, x)
         }
     }
+    ImageProcessor(
+        energy,
+        width,
+        height
+    ) { x, y, c ->
+        if(y > 0)
+        {
+            val i = y * width + x
+            cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width, y - 1, x)
+        }
+    }.process().join()
 
     val offset = width * height - 1
     var minEnergy = cumulativeEnergy[offset]
@@ -103,24 +119,26 @@ fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
     return outputPixels
 }
 
-fun rotate(pixels: IntArray, width: Int, height: Int, right: Boolean = false): IntArray {
+suspend fun rotate(pixels: IntArray, width: Int, height: Int, right: Boolean = false): IntArray {
     val outputPixels = IntArray(width * height)
-    repeat(height) { y ->
-        repeat(width) { x ->
-            var outX = y
-            var outY = width - x - 1
 
-            if(right)
-            {
-                outX = height - y - 1
-                outY = x
-            }
+    ImageProcessor(
+        pixels,
+        width,
+        height
+    ) { x, y, c ->
+        var outX = y
+        var outY = width - x - 1
 
-            val oi = outY * height + outX
-            val i = y * width + x
-            outputPixels[oi] = pixels[i]
+        if(right)
+        {
+            outX = height - y - 1
+            outY = x
         }
-    }
+
+        val oi = outY * height + outX
+        outputPixels[oi] = c
+    }.process().join()
 
     return outputPixels
 }

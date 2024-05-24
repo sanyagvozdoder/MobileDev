@@ -3,103 +3,67 @@ package com.example.mobiledev.presentation.algoritms
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.util.Log
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.core.graphics.set
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.Rgb
 import com.example.mobiledev.presentation.algoritms.util.generateUri
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.*
-import kotlin.math.roundToInt
 
 fun Blur(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
+    GlobalScope.launch {
+        val radius = args[0]
 
-    val radius = args[0]
+        val bitmap = toBitmap(img)
+        val width = bitmap.width
+        val height = bitmap.height
 
-    val bitmap = toBitmap(img)
-    val width = bitmap.width
-    val height = bitmap.height
-    val size = width * height
-    val pixels = IntArray(size)
-    bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        val pixels = IntArray(width * height)
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
 
+        val blurred = gaussianBlur(pixels, width, height, radius)
+
+        onEnd(generateUri(Bitmap.createBitmap(blurred, width, height, Bitmap.Config.ARGB_8888)))
+    }
+}
+
+suspend fun gaussianBlur(pixels: IntArray, width: Int, height: Int, radius: Int): IntArray {
     val newPixels = IntArray(pixels.size)
 
-    val kernel = calculateGaussianKernel(radius)
+    val kernel = calculateGaussianKernel1D(radius)
     val kernelRadius = radius / 3
 
-    for (y in 0 until height) {
-        for (x in 0 until width) {
-            var redSum = 0f
-            var greenSum = 0f
-            var blueSum = 0f
-            var weightSum = 0f
+    ImageProcessor(
+        pixels,
+        width,
+        height
+    ) { x, y, color ->
+        var redSum = 0f
+        var greenSum = 0f
+        var blueSum = 0f
+        var weightSum = 0f
 
-            for (i in -kernelRadius..kernelRadius) {
-                val pixelX = (x + i).coerceIn(0, width - 1)
-                val index = y * width + pixelX
-                val pixelColor = pixels[index]
-                val weight = kernel[i + kernelRadius]
+        for (i in -kernelRadius..kernelRadius) {
+            val pixelX = (x + i).coerceIn(0, width - 1)
+            val index = y * width + pixelX
+            val pixelColor = pixels[index]
+            val weight = kernel[i + kernelRadius]
 
-                redSum += Color.red(pixelColor) * weight
-                greenSum += Color.green(pixelColor) * weight
-                blueSum += Color.blue(pixelColor) * weight
-                weightSum += weight
-            }
-
-            val newRed = (redSum / weightSum).toInt().coerceIn(0, 255)
-            val newGreen = (greenSum / weightSum).toInt().coerceIn(0, 255)
-            val newBlue = (blueSum / weightSum).toInt().coerceIn(0, 255)
-
-            newPixels[y * width + x] = Color.rgb(newRed, newGreen, newBlue)
+            redSum += Color.red(pixelColor) * weight
+            greenSum += Color.green(pixelColor) * weight
+            blueSum += Color.blue(pixelColor) * weight
+            weightSum += weight
         }
-    }
 
-    for (x in 0 until width) {
-        for (y in 0 until height) {
-            var redSum = 0f
-            var greenSum = 0f
-            var blueSum = 0f
-            var weightSum = 0f
+        val newRed = (redSum / weightSum).toInt().coerceIn(0, 255)
+        val newGreen = (greenSum / weightSum).toInt().coerceIn(0, 255)
+        val newBlue = (blueSum / weightSum).toInt().coerceIn(0, 255)
 
-            for (i in -kernelRadius..kernelRadius) {
-                val pixelY = (y + i).coerceIn(0, height - 1)
-                val index = pixelY * width + x
-                val pixelColor = newPixels[index]
-                val weight = kernel[i + kernelRadius]
+        newPixels[y * width + x] = Color.rgb(newRed, newGreen, newBlue)
+    }.process().join()
 
-                redSum += Color.red(pixelColor) * weight
-                greenSum += Color.green(pixelColor) * weight
-                blueSum += Color.blue(pixelColor) * weight
-                weightSum += weight
-            }
-
-            val newRed = (redSum / weightSum).toInt().coerceIn(0, 255)
-            val newGreen = (greenSum / weightSum).toInt().coerceIn(0, 255)
-            val newBlue = (blueSum / weightSum).toInt().coerceIn(0, 255)
-
-            newPixels[y * width + x] = Color.rgb(newRed, newGreen, newBlue)
-        }
-    }
-
-    onEnd(generateUri(Bitmap.createBitmap(newPixels, width, height, Bitmap.Config.ARGB_8888)))
+    return newPixels
 }
-fun calculateGaussianKernel(radius: Int): FloatArray {
+fun calculateGaussianKernel1D(radius: Int): FloatArray {
     val kernelRadius = radius / 3
     val size = kernelRadius * 2 + 1
     val sigma = radius / 3.0

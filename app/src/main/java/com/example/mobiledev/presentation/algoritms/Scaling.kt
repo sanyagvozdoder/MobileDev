@@ -25,7 +25,7 @@ fun Scaling(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
         val outSums = MutableList<Rgb>(outputWidth * outputHeight) { Rgb(0, 0, 0, 0) }
         val outCounts = MutableList<Int>(outputWidth * outputHeight) { 0 }
 
-        val processPixel = { x: Int, y: Int, color: Int ->
+        ImageProcessor(bitmap){ x, y, color ->
             val outX = (x * factor).toInt()
             val outY = (y * factor).toInt()
 
@@ -49,42 +49,40 @@ fun Scaling(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
                 if(dx >= outputWidth)
                     break
             }
-        }
+        }.process().join()
 
-        val makeNewBitmap = {
-            val inPixels = IntArray(bitmap.width * bitmap.height)
-            bitmap.getPixels(inPixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-            bitmap.recycle()
+        val inPixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(inPixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        bitmap.recycle()
 
-            val outputPixels = IntArray(outputWidth * outputHeight)
+        val outputPixels = IntArray(outputWidth * outputHeight)
 
-            repeat(outputWidth) { x ->
-                repeat(outputHeight) { y ->
-                    val i = y * outputWidth + x
+        ImageProcessor(
+            outputPixels,
+            outputWidth,
+            outputHeight
+        ){ x, y, color ->
+            val i = y * outputWidth + x
 
-                    if (outCounts[i] > 0) {
-                        val pixel = outSums[i]
-                        val normalizer = 1f / outCounts[i]
+            if (outCounts[i] > 0) {
+                val pixel = outSums[i]
+                val normalizer = 1f / outCounts[i]
 
-                        pixel.red = (pixel.red * normalizer).toInt()
-                        pixel.green = (pixel.green * normalizer).toInt()
-                        pixel.blue = (pixel.blue * normalizer).toInt()
-                        pixel.alpha = (pixel.alpha * normalizer).toInt()
+                pixel.red = (pixel.red * normalizer).toInt()
+                pixel.green = (pixel.green * normalizer).toInt()
+                pixel.blue = (pixel.blue * normalizer).toInt()
+                pixel.alpha = (pixel.alpha * normalizer).toInt()
 
-                        val color = writeRGBA(pixel)
+                val color = writeRGBA(pixel)
 
-                        outputPixels[i] = color
-                    }
-                }
+                outputPixels[i] = color
             }
+        }.process().join()
 
-            val outputBitmap =
-                Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
-            outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
-            onEnd(generateUri(outputBitmap))
-        }
+        val outputBitmap =
+            Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
+        outputBitmap.setPixels(outputPixels, 0, outputWidth, 0, 0, outputWidth, outputHeight)
 
-        val processor = ImageProcessor(bitmap, processPixel)
-        processor.process(makeNewBitmap).join()
+        onEnd(generateUri(outputBitmap))
     }
 }

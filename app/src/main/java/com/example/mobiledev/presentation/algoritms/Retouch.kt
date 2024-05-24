@@ -3,31 +3,14 @@ package com.example.mobiledev.presentation.algoritms
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
-import android.util.Log
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import androidx.core.graphics.set
-import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
-import com.example.mobiledev.presentation.algoritms.util.Rgb
 import com.example.mobiledev.presentation.algoritms.util.generateUri
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.updateScreen
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
-import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.*
-import kotlin.math.roundToInt
-
+import kotlin.math.exp
+import kotlin.math.sqrt
 
 
 fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit,
