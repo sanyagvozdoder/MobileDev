@@ -77,12 +77,12 @@ suspend fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArra
         cumulativeEnergy[x] = energy[x]
     }
 
-    repeat(height - 1) { y ->
+    /*repeat(height - 1) { y ->
         repeat(width) { x ->
             val i = (y + 1) * width + x
             cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width,y, x)
         }
-    }
+    }*/
     ImageProcessor(
         energy,
         width,

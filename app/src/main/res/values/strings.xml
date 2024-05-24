@@ -36,6 +36,6 @@
     <string name="cv">Распознавание лиц</string>
     <string name="vector">Редактор слайнов</string>
     <string name="retouching">Ретуширование</string>
-    <string name="biline">Афинные преобразования</string>
+    <string name="afine">Афинные преобразования</string>
     <string name="cube">3D куб</string>
 </resources>
