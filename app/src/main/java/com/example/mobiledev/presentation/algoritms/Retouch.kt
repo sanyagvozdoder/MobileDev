@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.net.Uri
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.generateUri
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import kotlinx.coroutines.GlobalScope
@@ -31,7 +32,13 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
 
         image.getPixels(originalPixels, 0, width, 0, 0, width, height)
 
-        val processPixel = { x: Int, y: Int, color: Int ->
+        image.recycle()
+
+        ImageProcessor(
+            originalPixels,
+            width,
+            height
+        ) { x: Int, y: Int, color: Int ->
 
             val wsX = x * coefficientX
             val wsY = y * coefficientY
@@ -43,28 +50,21 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
 
                 val neighbors = getNeighbors(x, y, width, height, originalPixels)
 
-                val retouchedColor = calculateRetouchedColor(originalPixels[centerIndex],
-                neighbors,
-                strength * factor)
+                val retouchedColor = calculateRetouchedColor(
+                    color,
+                    neighbors,
+                    strength * factor
+                )
                 retouchedPixels[centerIndex] = retouchedColor
+            } else {
+                retouchedPixels[centerIndex] = color
             }
-            else
-            {
-                retouchedPixels[centerIndex] = originalPixels[centerIndex]
-            }
-        }
+        }.process().join()
 
-        val makeNewBitmap = {
-            image.recycle()
-
-            val outputBitmap =
-                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            outputBitmap.setPixels(retouchedPixels, 0, width, 0, 0, width, height)
-            onEnd(generateUri(outputBitmap))
-        }
-
-        val processor = ImageProcessor(image, processPixel)
-        processor.process(makeNewBitmap).join()
+        val outputBitmap =
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        outputBitmap.setPixels(retouchedPixels, 0, width, 0, 0, width, height)
+        onEnd(generateUri(outputBitmap))
     }
 }
 
