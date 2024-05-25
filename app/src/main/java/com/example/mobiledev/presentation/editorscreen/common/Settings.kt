@@ -29,31 +29,41 @@ import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 fun SettingsTools(
     modifier: Modifier = Modifier,
     sliders: SettingsItems?,
-    onAcceptClick:(ByteArray?, (Uri?)->Unit, List<Int>)->Unit,
+    onAcceptClick: (ByteArray?, (Uri?) -> Unit, List<Int>) -> Unit,
     editorScreenViewModel: EditorScreenViewModel,
     byteArray: ByteArray?
-){
-    val sliderPositions = remember { mutableStateListOf<Float>().apply {
-        repeat(sliders?.numOfSliders ?: 0) {index->
-            add(((sliders?.range?.get(index)?.second?.toFloat()?:100f) + (sliders?.range?.get(index)?.first?.toFloat()?:0f))/2)
+) {
+    val sliderPositions = remember {
+        mutableStateListOf<Float>().apply {
+            repeat(sliders?.numOfSliders ?: 0) { index ->
+                add(
+                    ((sliders?.range?.get(index)?.second?.toFloat() ?: 100f) + (sliders?.range?.get(
+                        index
+                    )?.first?.toFloat() ?: 0f)) / 2
+                )
+            }
         }
-    }}
+    }
 
-    val animatedTextStates = remember { mutableStateListOf<Boolean>().apply {
-        repeat(sliders?.numOfSliders ?: 0) {
-            add(false)
+    val animatedTextStates = remember {
+        mutableStateListOf<Boolean>().apply {
+            repeat(sliders?.numOfSliders ?: 0) {
+                add(false)
+            }
         }
-    }}
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.2f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.2f),
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             Button(
                 modifier = Modifier
                     .background(color = Color.Transparent),
@@ -73,13 +83,13 @@ fun SettingsTools(
                     .background(color = Color.Transparent),
                 onClick = {
                     var params = mutableListOf<Int>()
-                    (0..((sliders?.numOfSliders ?: 0) - 1)).forEach{index->
+                    (0..((sliders?.numOfSliders ?: 0) - 1)).forEach { index ->
                         params.add(sliderPositions[index].toInt())
                     }
-                    val lambda:(Uri?)->Unit = {uri->
+                    val lambda: (Uri?) -> Unit = { uri ->
                         editorScreenViewModel.onStateUpdate(uri)
                     }
-                    onAcceptClick(byteArray,lambda,params)
+                    onAcceptClick(byteArray, lambda, params)
                 }
             ) {
                 Icon(
@@ -90,7 +100,7 @@ fun SettingsTools(
             }
         }
 
-        (0..((sliders?.numOfSliders ?: 0) - 1)).forEach {index->
+        (0..((sliders?.numOfSliders ?: 0) - 1)).forEach { index ->
             Text(
                 text = (sliders?.text?.get(index)?.let { stringResource(it) } ?: " ") + ": " +
                         sliderPositions[index].toInt().toString(),
@@ -99,10 +109,11 @@ fun SettingsTools(
 
             androidx.compose.material3.Slider(
                 value = sliderPositions[index],
-                onValueChange = {newValue->
+                onValueChange = { newValue ->
                     sliderPositions[index] = newValue
                 },
-                valueRange = (sliders?.range?.get(index)?.first?.toFloat()?:0f)..(sliders?.range?.get(index)?.second?.toFloat()?:100f),
+                valueRange = (sliders?.range?.get(index)?.first?.toFloat()
+                    ?: 0f)..(sliders?.range?.get(index)?.second?.toFloat() ?: 100f),
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
         }

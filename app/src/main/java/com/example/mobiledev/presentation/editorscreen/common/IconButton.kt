@@ -1,6 +1,5 @@
 package com.example.mobiledev.presentation.editorscreen.common
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -15,17 +14,17 @@ import androidx.compose.ui.res.painterResource
 @Composable
 fun IconButton(
     modifier: Modifier = Modifier,
-    icon:Int,
-    onClick:()->Unit,
-    isEnabled:Boolean = true,
-    color:Color = MaterialTheme.colorScheme.primary
-){
+    icon: Int,
+    onClick: () -> Unit,
+    isEnabled: Boolean = true,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
     Button(
         modifier = modifier,
         onClick = onClick,
         enabled = isEnabled,
         colors = ButtonDefaults.buttonColors(containerColor = color)
-    ){
+    ) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = null,

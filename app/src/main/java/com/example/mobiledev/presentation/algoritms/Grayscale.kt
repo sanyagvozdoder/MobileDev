@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.generateUri
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
+import com.example.mobiledev.presentation.algoritms.util.readARGB
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
+import com.example.mobiledev.presentation.algoritms.util.writeARGB
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -24,7 +24,7 @@ fun Grayscale(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
 
         val processPixel = { x: Int, y: Int, color: Int ->
 
-            val pixel = readRGBA(color)
+            val pixel = readARGB(color)
 
             var totalColor = 0
 
@@ -35,7 +35,7 @@ fun Grayscale(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
             pixel.blue = totalColor
 
             val i = y * outputWidth + x
-            outputPixels[i] = writeRGBA(pixel)
+            outputPixels[i] = writeARGB(pixel)
         }
 
         val processor = ImageProcessor(bitmap, processPixel)

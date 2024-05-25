@@ -15,7 +15,7 @@ import kotlin.math.min
 // https://www.youtube.com/watch?v=6NcIJXTlugc
 // https://en.wikipedia.org/wiki/Seam_carving
 @OptIn(ExperimentalEncodingApi::class)
-fun SeamCarving(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>){
+fun SeamCarving(img: ByteArray?, onEnd: (Uri?) -> Unit, args: List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
         var pixels = IntArray(bitmap.width * bitmap.height)
@@ -28,7 +28,7 @@ fun SeamCarving(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>){
 
         bitmap.recycle()
 
-        if(targetWidth <= 0 || targetHeight <= 0)
+        if (targetWidth <= 0 || targetHeight <= 0)
             return@launch
 
         while (cWidth > targetWidth) {
@@ -51,7 +51,7 @@ fun SeamCarving(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>){
     }
 }
 
-suspend fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArray {
+suspend fun removeVerticalSeam(pixels: IntArray, width: Int, height: Int): IntArray {
     val outputPixels = IntArray((width - 1) * height)
     val energy = IntArray(width * height)
     val cumulativeEnergy = IntArray(width * height)
@@ -66,30 +66,16 @@ suspend fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArra
         energy[i] = computeEnergy(pixels, width, height, x, y)
     }.process().join()
 
-    /*repeat(height) { y ->
-        repeat(width) { x ->
-            val i = y * width + x
-            energy[i] = computeEnergy(pixels, width, height, x, y)
-        }
-    }*/
-
     repeat(width) { x ->
         cumulativeEnergy[x] = energy[x]
     }
 
-    /*repeat(height - 1) { y ->
-        repeat(width) { x ->
-            val i = (y + 1) * width + x
-            cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width,y, x)
-        }
-    }*/
     ImageProcessor(
         energy,
         width,
         height
     ) { x, y, c ->
-        if(y > 0)
-        {
+        if (y > 0) {
             val i = y * width + x
             cumulativeEnergy[i] = energy[i] + minEnergy(cumulativeEnergy, width, y - 1, x)
         }
@@ -102,7 +88,7 @@ suspend fun removeVerticalSeam(pixels: IntArray, width:Int, height:Int): IntArra
         minEnergy = min(minEnergy, cumulativeEnergy[x])
     }
 
-    for (y in height - 2 downTo  0) {
+    for (y in height - 2 downTo 0) {
         seamPath[y] = findMinIndex(cumulativeEnergy, width, y, seamPath[y + 1])
     }
 
@@ -130,8 +116,7 @@ suspend fun rotate(pixels: IntArray, width: Int, height: Int, right: Boolean = f
         var outX = y
         var outY = width - x - 1
 
-        if(right)
-        {
+        if (right) {
             outX = height - y - 1
             outY = x
         }

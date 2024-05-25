@@ -9,7 +9,7 @@ import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-fun Blur(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
+fun Blur(img: ByteArray?, onEnd: (Uri?) -> Unit, args: List<Int>) {
     GlobalScope.launch {
         val radius = args[0]
 
