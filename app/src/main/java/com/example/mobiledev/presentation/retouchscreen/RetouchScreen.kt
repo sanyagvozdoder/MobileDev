@@ -1,10 +1,16 @@
 package com.example.mobiledev.presentation.retouchscreen
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,9 +18,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -35,22 +47,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
 import com.example.mobiledev.data.sidebarmenu.menuitems
 import com.example.mobiledev.presentation.algoritms.applyRetouch
+import com.example.mobiledev.presentation.algoritms.util.createAppDirectoryIfNotExists
+import com.example.mobiledev.presentation.algoritms.util.saveToFile
+import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
+import com.example.mobiledev.presentation.editorscreen.generateNewFile
 import com.example.mobiledev.presentation.editorscreen.readBytes
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
@@ -75,7 +94,7 @@ fun RetouchScreen(
         mutableStateOf(30)
     }
 
-    var strenght by remember {
+    var strength by remember {
         mutableStateOf(50f)
     }
 
@@ -83,10 +102,25 @@ fun RetouchScreen(
 
     val context = LocalContext.current
 
+    var uriForCapturing: Uri = FileProvider.getUriForFile(
+        context,
+        context.applicationContext.packageName.toString() + ".provider",
+        generateNewFile()
+    )
+
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri->
             viewModel.onStateUpdate(uri)
+        }
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = {success->
+            if(success){
+                viewModel.onStateUpdate(uriForCapturing)
+            }
         }
     )
 
@@ -137,99 +171,140 @@ fun RetouchScreen(
                 )
             },
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(vertical = it.calculateTopPadding() + 10.dp)
-            ) {
-                Box(
+                    .padding(it)
+            ){
+                Column(
                     modifier = Modifier
-                        .weight(2f)
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.9f)
-                        .align(Alignment.CenterHorizontally)
-                        .pointerInput(Unit) {
-                            detectTapGestures {
-                                dots.add(it)
-                            }
-                        }
-                ){
-                    AsyncImage(
-                        model = stateUri.currentValue.value,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Canvas(
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .alpha(0.7f)
-                            .onGloballyPositioned { coordinates ->
-                                workSpaceSize = coordinates.size
+                            .weight(2f)
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.9f)
+                            .align(Alignment.CenterHorizontally)
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    if(stateUri.currentValue.value != null){
+                                        dots.add(it)
+                                    }
+                                }
                             }
                     ){
-                        dots.forEach{ dot ->
-                            drawCircle(
-                                color = Color.Black,
-                                radius = currentRadius.toFloat(),
-                                center = dot
+                        AsyncImage(
+                            model = stateUri.currentValue.value,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Canvas(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .alpha(0.7f)
+                                .onGloballyPositioned { coordinates ->
+                                    workSpaceSize = coordinates.size
+                                }
+                        ){
+                            dots.forEach{ dot ->
+                                drawCircle(
+                                    color = Color.Black,
+                                    radius = currentRadius.toFloat(),
+                                    center = dot
+                                )
+                            }
+                        }
+                    }
+                    AnimatedVisibility(visible = stateUri.currentValue.value != null, modifier = Modifier.padding(vertical = 16.dp)) {
+                        Column(modifier = Modifier.animateContentSize()){
+                            IconButton(
+                                modifier = Modifier.align(Alignment.End),
+                                onClick = {
+                                    applyRetouch(readBytes(context, stateUri.currentValue.value), strength,
+                                        { uri ->
+                                            viewModel.onStateUpdate(uri)
+                                            dots.clear()
+                                        }
+                                        , dots, currentRadius, workSpaceSize)
+                                },
+                                icon = R.drawable.ic_accept
+                            )
+                            Text(text = stringResource(id = R.string.radius) + ": " + currentRadius.toString(), modifier = Modifier
+                                .align(Alignment.CenterHorizontally))
+                            androidx.compose.material3.Slider(
+                                value = currentRadius.toFloat(),
+                                onValueChange = {newValue->
+                                    currentRadius = newValue.toInt()
+                                },
+                                valueRange = 1f..200f,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                            Text(text = stringResource(id = R.string.strength)+ "(%): " + strength.toInt().toString(),modifier = Modifier.align(Alignment.CenterHorizontally))
+                            androidx.compose.material3.Slider(
+                                value = strength,
+                                onValueChange = {newValue->
+                                    strength = newValue
+                                },
+                                valueRange = 0f..100f,
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier
-                        .weight(0.3f)
-                        .fillMaxSize()
-                ) {
-                    IconButton(
-                        icon = R.drawable.ic_pic,
-                        onClick = {
-                            pickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                    )
-                }
-                Row {
-                    Text(text = stringResource(id = R.string.radius) + ": " + currentRadius.toString(),
-                        modifier = Modifier.fillMaxWidth(0.2f))
-                    androidx.compose.material3.Slider(
-                        value = currentRadius.toFloat(),
-                        onValueChange = {newValue->
-                            currentRadius = newValue.toInt()
-                        },
-                        valueRange = 1f..200f,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
-                Row {
-                    Text(text = stringResource(id = R.string.strength)+ "(%): " + strenght.toInt().toString(),
-                        modifier = Modifier.fillMaxWidth(0.2f))
-                    androidx.compose.material3.Slider(
-                        value = strenght,
-                        onValueChange = {newValue->
-                            strenght = newValue
-                        },
-                        valueRange = 0f..100f,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
-                Row {
-                    Button(
-                        onClick = {
-                            applyRetouch(readBytes(context, stateUri.currentValue.value), strenght,
-                                { uri ->
-                                    viewModel.onStateUpdate(uri)
-                                    dots.clear()
-                                }
-                                , dots, currentRadius, workSpaceSize)
-                            //
-                        }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = stringResource(id = R.string.launch))
+                        IconButton(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp),
+                            icon = R.drawable.ic_pic,
+                            onClick = {
+                                pickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            isEnabled = true
+                        )
+                        Button(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .border(5.dp, Color.Black, CircleShape)
+                                .size(AssistChipDefaults.IconSize * 4)
+                                .clip(RoundedCornerShape(1f)),
+                            onClick = {
+                                uriForCapturing = FileProvider.getUriForFile(
+                                    context,
+                                    context.applicationContext.packageName.toString() + ".provider",
+                                    generateNewFile()
+                                )
+                                cameraLauncher.launch(uriForCapturing)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, Color.Black)
+                        ){
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_camera),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(AssistChipDefaults.IconSize * 2)
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+                        IconButton(
+                            icon = R.drawable.ic_save,
+                            onClick = {
+                                val directory = createAppDirectoryIfNotExists()
+                                Toast.makeText(context,"Файл сохранен в директорию " + directory.toString(), Toast.LENGTH_LONG).show()
+                                saveToFile(toBitmap(readBytes(context,stateUri.currentValue.value)), "IMG", ".jpg", directory)
+                            }
+                        )
                     }
                 }
             }
