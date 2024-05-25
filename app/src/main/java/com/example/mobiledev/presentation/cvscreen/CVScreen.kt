@@ -8,15 +8,11 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,12 +41,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,7 +54,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.FaceRecognition
-import com.example.mobiledev.presentation.algoritms.applyRetouch
 import com.example.mobiledev.presentation.algoritms.util.createAppDirectoryIfNotExists
 import com.example.mobiledev.presentation.algoritms.util.saveToFile
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
@@ -75,14 +67,14 @@ import java.io.IOException
 @Composable
 fun CVScreen(
     navController: NavController
-){
+) {
     val cvViewModel = viewModel<CVScreenViewModel>()
     val stateUri by cvViewModel.stateUriFlow.collectAsState()
     val context = LocalContext.current
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {uri-> cvViewModel.onStateUpdate(uri)}
+        onResult = { uri -> cvViewModel.onStateUpdate(uri) }
     )
     var uriForCapturing: Uri = FileProvider.getUriForFile(
         context,
@@ -92,8 +84,8 @@ fun CVScreen(
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
-        onResult = {success->
-            if(success){
+        onResult = { success ->
+            if (success) {
                 cvViewModel.onStateUpdate(uriForCapturing)
             }
         }
@@ -105,7 +97,7 @@ fun CVScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                cvViewModel.getMenuItems().forEachIndexed{ index, item->
+                cvViewModel.getMenuItems().forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -152,7 +144,7 @@ fun CVScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-            ){
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -171,10 +163,23 @@ fun CVScreen(
                     )
 
                     AnimatedVisibility(visible = stateUri != null) {
-                        Column(modifier = Modifier.animateContentSize().fillMaxWidth(), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Top){
+                        Column(
+                            modifier = Modifier
+                                .animateContentSize()
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.Top
+                        ) {
                             IconButton(
                                 onClick = {
-                                    cvViewModel.onStateUpdate(FaceRecognition(readBytes(context, stateUri), context.resources))
+                                    cvViewModel.onStateUpdate(
+                                        FaceRecognition(
+                                            readBytes(
+                                                context,
+                                                stateUri
+                                            ), context.resources
+                                        )
+                                    )
                                 },
                                 icon = R.drawable.ic_accept
                             )
@@ -210,8 +215,11 @@ fun CVScreen(
                                 )
                                 cameraLauncher.launch(uriForCapturing)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, Color.Black)
-                        ){
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                Color.Black
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_camera),
                                 contentDescription = null,
@@ -224,8 +232,19 @@ fun CVScreen(
                             icon = R.drawable.ic_save,
                             onClick = {
                                 val directory = createAppDirectoryIfNotExists()
-                                Toast.makeText(context,"Файл сохранен в директорию " + directory.toString(), Toast.LENGTH_LONG).show()
-                                saveToFile(toBitmap(com.example.mobiledev.presentation.editorscreen.readBytes(context,stateUri)), "IMG", ".jpg", directory)
+                                Toast.makeText(
+                                    context,
+                                    "Файл сохранен в директорию " + directory.toString(),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                saveToFile(
+                                    toBitmap(
+                                        com.example.mobiledev.presentation.editorscreen.readBytes(
+                                            context,
+                                            stateUri
+                                        )
+                                    ), "IMG", ".jpg", directory
+                                )
                             }
                         )
                     }
@@ -237,4 +256,4 @@ fun CVScreen(
 
 @Throws(IOException::class)
 private fun readBytes(context: Context, uri: Uri?): ByteArray? =
-    uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() }}
+    uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() } }
