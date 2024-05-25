@@ -3,10 +3,10 @@ package com.example.mobiledev.presentation.algoritms
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Environment
 import android.util.Log
 import com.example.mobiledev.R
 import com.example.mobiledev.presentation.algoritms.util.generateUri
+import com.example.mobiledev.presentation.algoritms.util.getTmpDirectory
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
@@ -70,8 +70,7 @@ fun detectFaces(image: Mat, cascadeClassifierPath: String): MatOfRect?{
 
 fun getCascadeFile(resources: Resources): File
 {
-    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val file = File.createTempFile("cascade", ".xml", downloadsDir)
+    val file = File.createTempFile("cascade", ".xml", getTmpDirectory())
 
     resources.openRawResource(R.raw.haarcascade_frontalface_default).bufferedReader().use {
         val ostream = FileOutputStream(file)

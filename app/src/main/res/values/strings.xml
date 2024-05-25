@@ -21,6 +21,8 @@
     <!--vector screen-->
     <string name="draw_mode_hint">Нажмите, чтобы разместить точку.</string>
     <string name="edit_mode_hint">Нажмите, чтобы выделить, удерживайте, чтобы переместить. Двойное нажатие - переключение якорь/точка.</string>
+    <string name="remove_point">Удалить точку</string>
+    <string name="remove_menu">Меню удаления</string>
 
     <!--common-->
     <string name="coef">Коэффициент</string>
@@ -30,6 +32,7 @@
     <string name="amount">Количество</string>
     <string name="launch">Пуск</string>
     <string name="clear">Очистить</string>
+    <string name="clear_all">Очистить всё</string>
 
     <!--side bar-->
     <string name="filters"> Фильтры</string>

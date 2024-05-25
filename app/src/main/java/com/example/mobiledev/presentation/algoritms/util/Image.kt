@@ -5,12 +5,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Environment
-import com.example.mobiledev.presentation.retouchscreen.RetouchScreenViewModel
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import okhttp3.internal.publicsuffix.PublicSuffixDatabase
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -21,6 +15,18 @@ fun createAppDirectoryIfNotExists() : File{
 
     return folder
 }
+
+fun getTmpDirectory() : File{
+    val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/HitsPhotoAppTEMP")
+    folder.mkdirs()
+
+    return folder
+}
+
+fun cleanTmpDirectory() {
+    getTmpDirectory().deleteRecursively()
+}
+
 fun toBitmap(data:ByteArray?):Bitmap {
     var bitmap = BitmapFactory.decodeByteArray(data,0, data?.size?:0)
     return bitmap.copy(Bitmap.Config.ARGB_8888,true)
@@ -41,8 +47,7 @@ fun writeRGBA(pixel:Rgb):Int {
 }
 
 fun generateUri(image:Bitmap): Uri {
-    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val file = saveToFile(image, "newImage", ".jpg", downloadsDir)
+    val file = saveToFile(image, "newImage", ".jpg", getTmpDirectory())
     file.deleteOnExit()
     return Uri.fromFile(file)
 }
