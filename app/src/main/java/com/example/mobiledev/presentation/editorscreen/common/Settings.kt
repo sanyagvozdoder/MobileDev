@@ -14,6 +14,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,6 +47,8 @@ fun SettingsTools(
         }
     }
 
+    val lockState by editorScreenViewModel.buttonLock.collectAsState()
+
     val animatedTextStates = remember {
         mutableStateListOf<Boolean>().apply {
             repeat(sliders?.numOfSliders ?: 0) {
@@ -65,6 +69,7 @@ fun SettingsTools(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
+                enabled = lockState,
                 modifier = Modifier
                     .background(color = Color.Transparent),
                 onClick = {
@@ -79,15 +84,18 @@ fun SettingsTools(
                 )
             }
             Button(
+                enabled = lockState,
                 modifier = Modifier
                     .background(color = Color.Transparent),
                 onClick = {
+                    editorScreenViewModel.onButtonLockUpdate(false)
                     var params = mutableListOf<Int>()
                     (0..((sliders?.numOfSliders ?: 0) - 1)).forEach { index ->
                         params.add(sliderPositions[index].toInt())
                     }
                     val lambda: (Uri?) -> Unit = { uri ->
                         editorScreenViewModel.onStateUpdate(uri)
+                        editorScreenViewModel.onButtonLockUpdate(true)
                     }
                     onAcceptClick(byteArray, lambda, params)
                 }

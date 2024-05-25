@@ -113,6 +113,8 @@ fun EditorScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val lockState by editViewModel.buttonLock.collectAsState()
+
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
