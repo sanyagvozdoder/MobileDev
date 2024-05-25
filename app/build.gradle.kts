@@ -89,4 +89,8 @@ dependencies {
 
     //camera
     implementation("androidx.fragment:fragment-ktx:1.7.1")
+
+    //splash
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
 }

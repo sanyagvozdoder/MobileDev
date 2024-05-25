@@ -102,6 +102,8 @@ fun RetouchScreen(
 
     val context = LocalContext.current
 
+    val lockState = viewModel.buttonLock.collectAsState()
+
     var uriForCapturing: Uri = FileProvider.getUriForFile(
         context,
         context.applicationContext.packageName.toString() + ".provider",
@@ -191,7 +193,7 @@ fun RetouchScreen(
                             .align(Alignment.CenterHorizontally)
                             .pointerInput(Unit) {
                                 detectTapGestures {
-                                    if(stateUri.currentValue.value != null){
+                                    if (stateUri.currentValue.value != null && lockState.value) {
                                         dots.add(it)
                                     }
                                 }
@@ -223,12 +225,15 @@ fun RetouchScreen(
                     AnimatedVisibility(visible = stateUri.currentValue.value != null, modifier = Modifier.padding(vertical = 16.dp)) {
                         Column(modifier = Modifier.animateContentSize()){
                             IconButton(
+                                isEnabled = lockState.value,
                                 modifier = Modifier.align(Alignment.End),
                                 onClick = {
+                                    viewModel.onButtonLockUpdate(false)
                                     applyRetouch(readBytes(context, stateUri.currentValue.value), strength,
                                         { uri ->
                                             viewModel.onStateUpdate(uri)
                                             dots.clear()
+                                            viewModel.onButtonLockUpdate(true)
                                         }
                                         , dots, currentRadius, workSpaceSize)
                                 },

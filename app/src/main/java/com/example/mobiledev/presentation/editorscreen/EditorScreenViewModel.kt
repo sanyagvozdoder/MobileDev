@@ -57,6 +57,17 @@ class EditorScreenViewModel:ViewModel() {
         }
     }
 
+    private val _buttonLock = MutableStateFlow<Boolean>(true)
+
+    val buttonLock:StateFlow<Boolean>
+        get() = _buttonLock
+
+    fun onButtonLockUpdate(state:Boolean){
+        viewModelScope.launch{
+            _buttonLock.emit(state)
+        }
+    }
+
     fun getMenuItems():List<SideBarElement>{
         return menuitems
     }
