@@ -2,27 +2,26 @@ package com.example.mobiledev.presentation.undoredostates
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 
 class StateSaver(
-    val initValue:Uri?
+    val initValue: Uri?
 ) {
     private val undoQueue = ArrayDeque<Uri?>()
     private val redoQueue = ArrayDeque<Uri?>()
 
     val currentValue = mutableStateOf<Uri?>(initValue)
 
-    fun update(newValue:Uri?){
+    fun update(newValue: Uri?) {
         currentValue.value = newValue
         undoQueue.addLast(newValue)
         redoQueue.clear()
     }
 
-    fun undo(){
+    fun undo() {
         val last = undoQueue.last()
         undoQueue.removeLast()
 
-        if(redoQueue.size == 0){
+        if (redoQueue.size == 0) {
             redoQueue.addFirst(last)
         }
 
@@ -30,11 +29,11 @@ class StateSaver(
         currentValue.value = undoQueue.last()
     }
 
-    fun redo(){
+    fun redo() {
         val first = redoQueue.first()
         redoQueue.removeFirst()
 
-        if(undoQueue.size == 0){
+        if (undoQueue.size == 0) {
             undoQueue.addLast(first)
         }
 
@@ -42,10 +41,11 @@ class StateSaver(
         currentValue.value = redoQueue.first()
     }
 
-    fun undoSize() : Int{
+    fun undoSize(): Int {
         return undoQueue.size
     }
-    fun redoSize() : Int{
+
+    fun redoSize(): Int {
         return redoQueue.size
     }
 }

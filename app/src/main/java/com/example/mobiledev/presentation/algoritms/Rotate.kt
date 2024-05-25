@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @OptIn(ExperimentalEncodingApi::class)
-fun Rotate(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
+fun Rotate(img: ByteArray?, onEnd: (Uri?) -> Unit, args: List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
         var pixels = IntArray(bitmap.width * bitmap.height)
@@ -24,7 +24,7 @@ fun Rotate(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
 
         val angleI = args[0]
 
-        if(angleI == 0)
+        if (angleI == 0)
             return@launch
 
         val angle = angleI.toDouble()
@@ -54,7 +54,12 @@ fun getNewDimensions(width: Int, height: Int, angleInDegrees: Double): Size {
     return Size(newWidth, newHeight)
 }
 
-suspend fun rotateImage(pixels: IntArray, width: Int, height: Int, angleInDegrees: Double): IntArray {
+suspend fun rotateImage(
+    pixels: IntArray,
+    width: Int,
+    height: Int,
+    angleInDegrees: Double
+): IntArray {
     val radianAngle = Math.toRadians(angleInDegrees)
 
     val sin = sin(radianAngle)

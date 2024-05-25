@@ -13,8 +13,9 @@ import kotlin.math.exp
 import kotlin.math.sqrt
 
 
-fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit,
-                 points:List<Offset>, radius:Int, workSpaceSize: IntSize
+fun applyRetouch(
+    img: ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit,
+    points: List<Offset>, radius: Int, workSpaceSize: IntSize
 ) {
     GlobalScope.launch {
         val image = toBitmap(img);
@@ -40,10 +41,8 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
             val x1 = minOf((point.x + radius) / coefficientX, width - 1f).toInt()
             val y1 = minOf((point.y + radius) / coefficientY, height - 1f).toInt()
 
-            for(x in x0..x1)
-            {
-                for(y in y0..y1)
-                {
+            for (x in x0..x1) {
+                for (y in y0..y1) {
                     val wsX = x * coefficientX
                     val wsY = y * coefficientY
 
@@ -72,7 +71,7 @@ fun applyRetouch(img:ByteArray?, strengthPercentage: Float, onEnd: (Uri) -> Unit
     }
 }
 
-fun getMaskFactor(spline: List<Offset>, radius: Int, p0: Offset) : Float {
+fun getMaskFactor(spline: List<Offset>, radius: Int, p0: Offset): Float {
     var minDist = radius + 100f
 
     // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
@@ -114,8 +113,7 @@ fun calculateRetouchedColor(centerColor: Int, neighbors: List<Int>, strength: Fl
     return Color.rgb(newRed, newGreen, newBlue)
 }
 
-fun getNeighbors(x : Int, y : Int, width : Int, height : Int, originalPixels : IntArray) : List<Int>
-{
+fun getNeighbors(x: Int, y: Int, width: Int, height: Int, originalPixels: IntArray): List<Int> {
     val neighbors = mutableListOf<Int>()
     for (dy in -2..2) {
         for (dx in -2..2) {

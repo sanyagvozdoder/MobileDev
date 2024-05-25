@@ -17,31 +17,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobiledev.presentation.editorscreen.EditorScreenViewModel
 import com.example.mobiledev.presentation.editorscreen.readBytes
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun LazyItemScope.SliderItem(
-    icon:Int,
-    text:Int,
+    icon: Int,
+    text: Int,
     vmInst: EditorScreenViewModel,
-    index:Int,
+    index: Int,
     context: Context
-){
+) {
     val stateUri by vmInst.stateUriFlow.collectAsState()
 
     Column(
@@ -66,7 +58,7 @@ fun LazyItemScope.SliderItem(
                         vmInst.onSettingsStateUpdate(index)
                     }
                 })
-        ){
+        ) {
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = null,

@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CubeScreen(
     navController: NavController
-){
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -68,7 +68,7 @@ fun CubeScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                viewModel.getMenuItems().forEachIndexed{ index, item->
+                viewModel.getMenuItems().forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -186,7 +186,7 @@ fun CubeScreen(
                         val proj0 = project(cam, moveZ(p0, move), scale)
                         val proj1 = project(cam, moveZ(p1, move), scale)
                         val proj2 = project(cam, moveZ(p2, move), scale)
-                        val triPath = Path().apply{
+                        val triPath = Path().apply {
                             moveTo(proj0.x, proj0.y)
                             lineTo(proj1.x, proj1.y)
                             lineTo(proj2.x, proj2.y)
@@ -202,8 +202,10 @@ fun CubeScreen(
                 Column {
 
                     Row {
-                        Text(text = "X: " + angleX.value.toString(),
-                            modifier = Modifier.fillMaxWidth(0.2f))
+                        Text(
+                            text = "X: " + angleX.value.toString(),
+                            modifier = Modifier.fillMaxWidth(0.2f)
+                        )
                         androidx.compose.material3.Slider(
                             value = angleX.value.toFloat(),
                             onValueChange = { newValue ->
@@ -215,11 +217,13 @@ fun CubeScreen(
                         )
                     }
                     Row {
-                        Text(text = "Y: " + angleY.value.toString(),
-                            modifier = Modifier.fillMaxWidth(0.2f))
+                        Text(
+                            text = "Y: " + angleY.value.toString(),
+                            modifier = Modifier.fillMaxWidth(0.2f)
+                        )
                         androidx.compose.material3.Slider(
                             value = angleY.value.toFloat(),
-                            onValueChange = {newValue->
+                            onValueChange = { newValue ->
                                 angleY.value = newValue.toInt()
                             },
                             valueRange = -180f..180f,
@@ -228,11 +232,13 @@ fun CubeScreen(
                         )
                     }
                     Row {
-                        Text(text = "Z: " + angleZ.value.toString(),
-                            modifier = Modifier.fillMaxWidth(0.2f))
+                        Text(
+                            text = "Z: " + angleZ.value.toString(),
+                            modifier = Modifier.fillMaxWidth(0.2f)
+                        )
                         androidx.compose.material3.Slider(
                             value = angleZ.value.toFloat(),
-                            onValueChange = {newValue->
+                            onValueChange = { newValue ->
                                 angleZ.value = newValue.toInt()
                             },
                             valueRange = -180f..180f,

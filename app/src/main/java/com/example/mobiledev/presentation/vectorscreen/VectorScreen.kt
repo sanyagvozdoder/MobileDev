@@ -140,14 +140,15 @@ fun VectorScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-            ){
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    Row(modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .height(with(LocalDensity.current) { 10.sp.toDp() * 5 })
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .height(with(LocalDensity.current) { 10.sp.toDp() * 5 })
                     ) {
                         if (screenMode.value == VectorScreenMode.DRAW)
                             Text(

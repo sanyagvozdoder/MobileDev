@@ -1,10 +1,7 @@
 package com.example.mobiledev.presentation.editorscreen
 
-import android.annotation.SuppressLint
-import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -41,41 +38,41 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.mobiledev.R
+import com.example.mobiledev.presentation.algoritms.util.createAppDirectoryIfNotExists
+import com.example.mobiledev.presentation.algoritms.util.saveToFile
+import com.example.mobiledev.presentation.algoritms.util.toBitmap
 import com.example.mobiledev.presentation.editorscreen.common.IconButton
 import com.example.mobiledev.presentation.editorscreen.common.SettingsTools
 import com.example.mobiledev.presentation.editorscreen.common.Slider
 import com.example.mobiledev.presentation.sidebar.common.SideBarItem
 import kotlinx.coroutines.launch
 import java.io.IOException
-import androidx.compose.runtime.Composable as Composable
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.core.content.FileProvider
-import com.example.mobiledev.presentation.algoritms.util.createAppDirectoryIfNotExists
-import com.example.mobiledev.presentation.algoritms.util.saveToFile
-import com.example.mobiledev.presentation.algoritms.util.toBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
     navController: NavController,
-){
+) {
     val editViewModel = viewModel<EditorScreenViewModel>()
     val stateUri by editViewModel.stateUriFlow.collectAsState()
     val sliderState by editViewModel.isSliderVisible.collectAsState()
@@ -85,17 +82,17 @@ fun EditorScreen(
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {uri->
-            if(uri!=null){
+        onResult = { uri ->
+            if (uri != null) {
                 editViewModel.onStateUpdate(uri)
-                if(stateUri.currentValue.value != null){
+                if (stateUri.currentValue.value != null) {
                     editViewModel.onSliderStateUpdate(true)
                 }
             }
         }
     )
 
-    var uriForCapturing:Uri = FileProvider.getUriForFile(
+    var uriForCapturing: Uri = FileProvider.getUriForFile(
         context,
         context.applicationContext.packageName.toString() + ".provider",
         generateNewFile()
@@ -103,10 +100,10 @@ fun EditorScreen(
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
-        onResult = {success->
-            if(success){
+        onResult = { success ->
+            if (success) {
                 editViewModel.onStateUpdate(uriForCapturing)
-                if(stateUri.currentValue.value != null){
+                if (stateUri.currentValue.value != null) {
                     editViewModel.onSliderStateUpdate(true)
                 }
             }
@@ -119,7 +116,7 @@ fun EditorScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                editViewModel.getMenuItems().forEachIndexed{index,item->
+                editViewModel.getMenuItems().forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -158,7 +155,7 @@ fun EditorScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary
-                        )
+                    )
                 )
             },
         ) {
@@ -269,20 +266,36 @@ fun EditorScreen(
                                 )
                                 cameraLauncher.launch(uriForCapturing)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, Color.Black)
-                        ){
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                Color.Black
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_camera),
                                 contentDescription = null,
-                                modifier = Modifier.size(AssistChipDefaults.IconSize * 2).align(Alignment.CenterVertically)
+                                modifier = Modifier
+                                    .size(AssistChipDefaults.IconSize * 2)
+                                    .align(Alignment.CenterVertically)
                             )
                         }
                         IconButton(
                             icon = R.drawable.ic_save,
                             onClick = {
                                 val directory = createAppDirectoryIfNotExists()
-                                Toast.makeText(context,"Файл сохранен в директорию " + directory.toString(), Toast.LENGTH_LONG).show()
-                                saveToFile(toBitmap(readBytes(context,stateUri.currentValue.value)), "IMG", ".jpg", directory)
+                                Toast.makeText(
+                                    context,
+                                    "Файл сохранен в директорию " + directory.toString(),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                saveToFile(
+                                    toBitmap(
+                                        readBytes(
+                                            context,
+                                            stateUri.currentValue.value
+                                        )
+                                    ), "IMG", ".jpg", directory
+                                )
                             }
                         )
                     }

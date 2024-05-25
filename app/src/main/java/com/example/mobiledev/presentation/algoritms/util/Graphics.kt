@@ -26,7 +26,7 @@ data class Camera(
 
 //https://en.wikipedia.org/wiki/3D_projection
 //т.н. *weak* perspective projection
-fun project(camera: Camera, vertex: Vertex, scale: Double = 50.0) : Offset{
+fun project(camera: Camera, vertex: Vertex, scale: Double = 50.0): Offset {
     val sizeXHalf = camera.screen.width / 2
     val sizeYHalf = camera.screen.height / 2
 
@@ -37,7 +37,7 @@ fun project(camera: Camera, vertex: Vertex, scale: Double = 50.0) : Offset{
 }
 
 //https://en.wikipedia.org/wiki/Rotation_matrix
-fun rotateX(vertex: Vertex, angle: Double) : Vertex{
+fun rotateX(vertex: Vertex, angle: Double): Vertex {
     return Vertex(
         vertex.x,
         (cos(angle) * vertex.y - sin(angle) * vertex.z).toFloat(),
@@ -45,7 +45,7 @@ fun rotateX(vertex: Vertex, angle: Double) : Vertex{
     )
 }
 
-fun rotateY(vertex: Vertex, angle: Double) : Vertex{
+fun rotateY(vertex: Vertex, angle: Double): Vertex {
     return Vertex(
         (cos(angle) * vertex.x - sin(angle) * vertex.z).toFloat(),
         vertex.y,
@@ -53,7 +53,7 @@ fun rotateY(vertex: Vertex, angle: Double) : Vertex{
     )
 }
 
-fun rotateZ(vertex: Vertex, angle: Double) : Vertex{
+fun rotateZ(vertex: Vertex, angle: Double): Vertex {
     return Vertex(
         (cos(angle) * vertex.x - sin(angle) * vertex.y).toFloat(),
         (sin(angle) * vertex.x + cos(angle) * vertex.y).toFloat(),
@@ -61,12 +61,11 @@ fun rotateZ(vertex: Vertex, angle: Double) : Vertex{
     )
 }
 
-fun rotateXYZ(vertex: Vertex, x: Double, y: Double, z: Double): Vertex
-{
+fun rotateXYZ(vertex: Vertex, x: Double, y: Double, z: Double): Vertex {
     return rotateZ(rotateY(rotateX(vertex, x), y), z)
 }
 
-fun moveZ(vertex: Vertex, amount: Float) : Vertex {
+fun moveZ(vertex: Vertex, amount: Float): Vertex {
     return Vertex(
         vertex.x,
         vertex.y,

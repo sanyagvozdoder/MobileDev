@@ -4,16 +4,16 @@ import android.graphics.Bitmap
 import android.net.Uri
 import com.example.mobiledev.presentation.algoritms.util.ImageProcessor
 import com.example.mobiledev.presentation.algoritms.util.generateUri
-import com.example.mobiledev.presentation.algoritms.util.readRGBA
+import com.example.mobiledev.presentation.algoritms.util.readARGB
 import com.example.mobiledev.presentation.algoritms.util.toBitmap
-import com.example.mobiledev.presentation.algoritms.util.writeRGBA
+import com.example.mobiledev.presentation.algoritms.util.writeARGB
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 // https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%81%D1%88%D1%82%D0%B0%D0%B1%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
 @OptIn(ExperimentalEncodingApi::class)
-fun Negative(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
+fun Negative(img: ByteArray?, onEnd: (Uri?) -> Unit, args: List<Int>) {
     GlobalScope.launch {
         val bitmap = toBitmap(img)
 
@@ -24,7 +24,7 @@ fun Negative(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
 
         val processPixel = { x: Int, y: Int, color: Int ->
 
-            val pixel = readRGBA(color)
+            val pixel = readARGB(color)
 
 
             pixel.red = 255 - pixel.red
@@ -32,7 +32,7 @@ fun Negative(img:ByteArray?, onEnd: (Uri?) -> Unit, args:List<Int>) {
             pixel.green = 255 - pixel.green
 
             val i = y * outputWidth + x
-            outputPixels[i] = writeRGBA(pixel)
+            outputPixels[i] = writeARGB(pixel)
         }
 
         val processor = ImageProcessor(bitmap, processPixel)

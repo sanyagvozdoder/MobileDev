@@ -18,15 +18,15 @@ import org.opencv.objdetect.CascadeClassifier
 import java.io.File
 import java.io.FileOutputStream
 
-fun FaceRecognition(image:ByteArray?, resources: Resources): Uri?{
-    if(!OpenCVLoader.initLocal()) {
+fun FaceRecognition(image: ByteArray?, resources: Resources): Uri? {
+    if (!OpenCVLoader.initLocal()) {
         Log.d("FRECOG", "OpenCV not loaded")
 
     }
 
     // https://stackoverflow.com/questions/17390289/convert-bitmap-to-mat-after-capture-image-using-android-camera
     var bitmap = toBitmap(image)
-    bitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true)
+    bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
     val cvImg = Mat()
     Utils.bitmapToMat(bitmap, cvImg)
 
@@ -35,8 +35,7 @@ fun FaceRecognition(image:ByteArray?, resources: Resources): Uri?{
 
     val faces = detectFaces(cvImg, cascadeFile.absolutePath)
 
-    if(faces != null)
-    {
+    if (faces != null) {
         for (rect in faces.toArray()) {
             Imgproc.rectangle(cvImg, rect, Scalar(0.0, 255.0, 0.0), 2)
         }
@@ -50,7 +49,7 @@ fun FaceRecognition(image:ByteArray?, resources: Resources): Uri?{
     return generateUri(bitmap)
 }
 
-fun detectFaces(image: Mat, cascadeClassifierPath: String): MatOfRect?{
+fun detectFaces(image: Mat, cascadeClassifierPath: String): MatOfRect? {
     val grayImage = Mat()
     Imgproc.cvtColor(image, grayImage, Imgproc.COLOR_BGR2GRAY)
     Imgproc.equalizeHist(grayImage, grayImage)
@@ -68,8 +67,7 @@ fun detectFaces(image: Mat, cascadeClassifierPath: String): MatOfRect?{
     return faces
 }
 
-fun getCascadeFile(resources: Resources): File
-{
+fun getCascadeFile(resources: Resources): File {
     val file = File.createTempFile("cascade", ".xml", getTmpDirectory())
 
     resources.openRawResource(R.raw.haarcascade_frontalface_default).bufferedReader().use {

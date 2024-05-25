@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class VectorScreenViewModel:ViewModel() {
+class VectorScreenViewModel : ViewModel() {
     private val _screenModeState = MutableStateFlow<VectorScreenMode>(VectorScreenMode.DRAW)
 
     val screenModeState: StateFlow<VectorScreenMode>
         get() = _screenModeState
 
-    fun onScreenModeUpdate(newMode:VectorScreenMode){
-        viewModelScope.launch{
+    fun onScreenModeUpdate(newMode: VectorScreenMode) {
+        viewModelScope.launch {
             _screenModeState.emit(newMode)
         }
     }
@@ -27,12 +27,13 @@ class VectorScreenViewModel:ViewModel() {
     val splineModeState: StateFlow<SplineMode>
         get() = _splineModeState
 
-    fun onSplineModeUpdate(newMode:SplineMode){
-        viewModelScope.launch{
+    fun onSplineModeUpdate(newMode: SplineMode) {
+        viewModelScope.launch {
             _splineModeState.emit(newMode)
         }
     }
-    fun getMenuItems():List<SideBarElement>{
+
+    fun getMenuItems(): List<SideBarElement> {
         return menuitems
     }
 }

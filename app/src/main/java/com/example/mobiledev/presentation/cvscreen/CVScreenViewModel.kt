@@ -9,19 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CVScreenViewModel:ViewModel() {
+class CVScreenViewModel : ViewModel() {
     private val _stateUriFlow = MutableStateFlow<Uri?>(null)
 
     val stateUriFlow: StateFlow<Uri?>
         get() = _stateUriFlow
 
-    fun onStateUpdate(newImage: Uri?){
-        viewModelScope.launch{
+    fun onStateUpdate(newImage: Uri?) {
+        viewModelScope.launch {
             _stateUriFlow.emit(newImage)
         }
     }
 
-    fun getMenuItems():List<SideBarElement>{
+    fun getMenuItems(): List<SideBarElement> {
         return menuitems
     }
 }

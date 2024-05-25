@@ -49,14 +49,14 @@ import java.io.IOException
 @Composable
 fun CVScreen(
     navController: NavController
-){
+) {
     val cvViewModel = viewModel<CVScreenViewModel>()
     val stateUri by cvViewModel.stateUriFlow.collectAsState()
     val context = LocalContext.current
 
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {uri-> cvViewModel.onStateUpdate(uri)}
+        onResult = { uri -> cvViewModel.onStateUpdate(uri) }
     )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -65,7 +65,7 @@ fun CVScreen(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                cvViewModel.getMenuItems().forEachIndexed{ index, item->
+                cvViewModel.getMenuItems().forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         label = {
                             SideBarItem(
@@ -115,13 +115,13 @@ fun CVScreen(
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize()
-                ){
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.85f)
                             .align(Alignment.Center)
-                    ){
+                    ) {
                         AsyncImage(
                             model = stateUri,
                             contentDescription = null,
@@ -150,9 +150,14 @@ fun CVScreen(
                             .align(Alignment.BottomEnd)
                             .padding(horizontal = 5.dp, vertical = 5.dp),
                         onClick = {
-                            cvViewModel.onStateUpdate(FaceRecognition(readBytes(context, stateUri), context.resources))
+                            cvViewModel.onStateUpdate(
+                                FaceRecognition(
+                                    readBytes(context, stateUri),
+                                    context.resources
+                                )
+                            )
                         }
-                    ){
+                    ) {
                         Text(text = stringResource(id = R.string.launch))
                     }
                 }
@@ -163,4 +168,4 @@ fun CVScreen(
 
 @Throws(IOException::class)
 private fun readBytes(context: Context, uri: Uri?): ByteArray? =
-    uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() }}
+    uri?.let { context.contentResolver.openInputStream(it)?.use { it.buffered().readBytes() } }

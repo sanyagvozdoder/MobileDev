@@ -9,15 +9,21 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
-fun createAppDirectoryIfNotExists() : File{
-    val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/HitsPhotoApp")
+fun createAppDirectoryIfNotExists(): File {
+    val folder = File(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            .toString() + "/HitsPhotoApp"
+    )
     folder.mkdirs()
 
     return folder
 }
 
-fun getTmpDirectory() : File{
-    val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/HitsPhotoAppTEMP")
+fun getTmpDirectory(): File {
+    val folder = File(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            .toString() + "/HitsPhotoAppTEMP"
+    )
     folder.mkdirs()
 
     return folder
@@ -27,32 +33,32 @@ fun cleanTmpDirectory() {
     getTmpDirectory().deleteRecursively()
 }
 
-fun toBitmap(data:ByteArray?):Bitmap {
-    var bitmap = BitmapFactory.decodeByteArray(data,0, data?.size?:0)
-    return bitmap.copy(Bitmap.Config.ARGB_8888,true)
+fun toBitmap(data: ByteArray?): Bitmap {
+    var bitmap = BitmapFactory.decodeByteArray(data, 0, data?.size ?: 0)
+    return bitmap.copy(Bitmap.Config.ARGB_8888, true)
 }
 
-fun toByteArray(data:Bitmap?):ByteArray {
+fun toByteArray(data: Bitmap?): ByteArray {
     val stream = ByteArrayOutputStream()
-    data?.compress(Bitmap.CompressFormat.JPEG,90,stream)
+    data?.compress(Bitmap.CompressFormat.JPEG, 90, stream)
     return stream.toByteArray()
 }
 
-fun readRGBA(pixel:Int):Rgb {
-    return Rgb(Color.red(pixel), Color.green(pixel), Color.blue(pixel), Color.alpha(pixel))
+fun readARGB(pixel: Int): Rgba {
+    return Rgba(Color.red(pixel), Color.green(pixel), Color.blue(pixel), Color.alpha(pixel))
 }
 
-fun writeRGBA(pixel:Rgb):Int {
+fun writeARGB(pixel: Rgba): Int {
     return Color.argb(pixel.alpha, pixel.red, pixel.green, pixel.blue)
 }
 
-fun generateUri(image:Bitmap): Uri {
+fun generateUri(image: Bitmap): Uri {
     val file = saveToFile(image, "newImage", ".jpg", getTmpDirectory())
     file.deleteOnExit()
     return Uri.fromFile(file)
 }
 
-fun saveToFile(image: Bitmap, prefix: String, suffix:String, directory: File) : File {
+fun saveToFile(image: Bitmap, prefix: String, suffix: String, directory: File): File {
     val file = File.createTempFile(prefix, suffix, directory)
     val ostream = FileOutputStream(file)
     ostream.write(toByteArray(image))
